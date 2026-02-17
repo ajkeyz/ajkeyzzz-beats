@@ -402,6 +402,7 @@ export default function PlayerBar({
       <AnimatePresence>
         {!expanded && (
           <motion.div
+            className="player-bar-mini"
             initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }}
             transition={{ type: 'spring', damping: 25 }}
             style={{
@@ -411,6 +412,77 @@ export default function PlayerBar({
             }}
             role="region" aria-label="Audio player"
           >
+            {/* ── Mobile mini player ── */}
+            <div className="player-mobile-mini" onClick={() => setExpanded(true)} style={{ display: 'none', position: 'relative', cursor: 'pointer' }}>
+              <div style={{
+                position: 'absolute', top: 0, left: 0, right: 0, height: 3,
+                background: 'var(--border-subtle, rgba(255,255,255,0.06))', overflow: 'hidden',
+              }}>
+                <div style={{
+                  height: '100%', width: `${progress}%`,
+                  background: `linear-gradient(90deg, ${color}, ${color}cc)`,
+                  borderRadius: '0 2px 2px 0', transition: 'width 0.3s linear',
+                }} />
+              </div>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                padding: '10px 12px 10px 16px', height: 64,
+              }}>
+                <div style={{
+                  width: 44, height: 44, borderRadius: 'var(--radius-xs)', flexShrink: 0,
+                  background: beat.cover_art_url
+                    ? `url(${beat.cover_art_url}) center/cover`
+                    : `linear-gradient(135deg, ${color}33, ${color}11)`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, overflow: 'hidden',
+                  boxShadow: isPlaying ? `0 0 12px ${color}22` : 'none',
+                }}>
+                  {!beat.cover_art_url && (beat.cover_emoji || beat.coverEmoji || '🎵')}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.3 }}>
+                    {beat.title}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.3 }}>
+                    {beat.typebeat || ''}
+                  </div>
+                </div>
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={(e) => { e.stopPropagation(); onPlayPause(); }}
+                  style={{
+                    width: 44, height: 44, borderRadius: '50%', background: color,
+                    border: 'none', cursor: 'pointer', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0,
+                    boxShadow: `0 0 20px ${color}33`,
+                  }}
+                  aria-label={isPlaying ? 'Pause' : 'Play'}
+                >
+                  {loading ? (
+                    <div style={{ width: 18, height: 18, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                  ) : (
+                    isPlaying ? <Icons.Pause /> : <Icons.Play />
+                  )}
+                </motion.button>
+                <button
+                  className="expand-btn-mobile"
+                  onClick={(e) => { e.stopPropagation(); setExpanded(true); }}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: 'var(--text-muted)', display: 'flex', padding: 8, flexShrink: 0,
+                    alignItems: 'center', justifyContent: 'center',
+                    minWidth: 44, minHeight: 44,
+                  }}
+                  aria-label="Expand player"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                    <polyline points="18 15 12 9 6 15" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* ── Desktop mini player ── */}
+            <div className="player-desktop-mini">
             {/* Waveform scrubber */}
             <div style={{ padding: '0 24px', maxWidth: 1280, margin: '0 auto' }}>
               <Waveform audioUrl={beat.preview_url} progress={progress} color={color} height={28} onSeek={onSeek} isPlaying={isPlaying} mini />
@@ -555,15 +627,25 @@ export default function PlayerBar({
                 </motion.button>
               </div>
             </div>
+            </div>
 
             <style>{`
+              @keyframes chevronBounce {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-3px); }
+              }
               @media (max-width: 768px) {
-                .player-vol { display: none !important; }
-                .player-license-btn { display: none !important; }
-                .player-extra-btn { display: none !important; }
-                .player-shuffle-btn { display: none !important; }
-                .player-repeat-btn { display: none !important; }
-                .player-time { display: none !important; }
+                .player-mobile-mini { display: block !important; }
+                .player-desktop-mini { display: none !important; }
+                .player-bar-mini {
+                  bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+                  box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+                  border-radius: 16px 16px 0 0;
+                  border-top: none !important;
+                }
+                .expand-btn-mobile svg {
+                  animation: chevronBounce 2s ease-in-out infinite;
+                }
               }
             `}</style>
           </motion.div>

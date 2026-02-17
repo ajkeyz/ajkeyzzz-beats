@@ -178,7 +178,7 @@ export default function App() {
          onBlur={(e) => { e.target.style.top = '-40px'; }}>
         Skip to main content
       </a>
-      <div id="main-content" style={{ minHeight: '100vh', background: 'var(--bg-primary)', paddingBottom: player.currentBeat ? 100 : 0 }}>
+      <div id="main-content" className={player.currentBeat ? 'has-player' : ''} style={{ minHeight: '100vh', background: 'var(--bg-primary)', paddingBottom: player.currentBeat ? 100 : 0 }}>
         <Navbar isAdmin={isAdmin} onLogout={logout} />
 
         <Suspense fallback={<PageLoader />}>
@@ -275,6 +275,14 @@ export default function App() {
 
         {/* Mobile Bottom Nav */}
         <MobileNav hasPlayer={!!player.currentBeat} />
+
+        {/* Mobile layout spacing */}
+        <style>{`
+          @media (max-width: 768px) {
+            #main-content { padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important; }
+            #main-content.has-player { padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)) !important; }
+          }
+        `}</style>
 
         {/* Cookie Consent */}
         <CookieBanner />

@@ -10,7 +10,7 @@ const tabs = [
 
 function TabIcon({ type, active }) {
   const color = active ? 'var(--accent)' : 'var(--text-muted)';
-  const size = 20;
+  const size = 22;
   const sw = active ? '2.5' : '1.8';
   switch (type) {
     case 'home':
@@ -53,17 +53,16 @@ export default function MobileNav({ hasPlayer }) {
     <nav
       className="mobile-bottom-nav"
       style={{
-        position: 'fixed', bottom: hasPlayer ? 88 : 0, left: 0, right: 0, zIndex: 999,
+        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 999,
         background: 'var(--glass-strong)', backdropFilter: 'blur(24px) saturate(180%)',
         borderTop: '1px solid var(--border)',
         display: 'none',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-        transition: 'bottom 0.3s var(--ease-out)',
       }}
     >
       <div style={{
         display: 'flex', justifyContent: 'space-around',
-        padding: '6px 8px 2px', maxWidth: 400, margin: '0 auto',
+        padding: '8px 8px 4px', maxWidth: 400, margin: '0 auto',
       }}>
         {tabs.map((tab) => {
           const isActive = tab.path === '/'
@@ -76,7 +75,7 @@ export default function MobileNav({ hasPlayer }) {
               style={{
                 background: 'none', border: 'none', cursor: 'pointer',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-                padding: '6px 16px', position: 'relative', minWidth: 56,
+                padding: '8px 16px', position: 'relative', minWidth: 56,
                 transition: 'transform var(--duration-fast)',
               }}
             >
@@ -87,7 +86,7 @@ export default function MobileNav({ hasPlayer }) {
                 <TabIcon type={tab.icon} active={isActive} />
               </motion.div>
               <span style={{
-                fontSize: 10, fontWeight: isActive ? 600 : 400,
+                fontSize: 11, fontWeight: isActive ? 700 : 500,
                 color: isActive ? 'var(--accent)' : 'var(--text-muted)',
                 transition: 'color var(--duration-normal)',
               }}>
@@ -97,10 +96,10 @@ export default function MobileNav({ hasPlayer }) {
                 <motion.div
                   layoutId="mobile-tab-indicator"
                   style={{
-                    position: 'absolute', top: -1, left: '25%', right: '25%',
-                    height: 2, borderRadius: 1,
+                    position: 'absolute', top: -1, left: '20%', right: '20%',
+                    height: 3, borderRadius: 1.5,
                     background: 'var(--accent)',
-                    boxShadow: '0 0 8px var(--accent)',
+                    boxShadow: '0 0 12px var(--accent), 0 0 4px var(--accent)',
                   }}
                   transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 />

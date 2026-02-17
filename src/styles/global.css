@@ -376,6 +376,7 @@ body {
 @media (max-width: 768px) {
   .desktop-nav { display: none !important; }
   .mobile-toggle { display: block !important; }
+  :root { --text-hero: clamp(40px, 11vw, 52px); }
 }
 
 /* Range input styling */
@@ -482,4 +483,16 @@ nav, .nav-link, .card-hover, .glass-card, button, a, input, select, textarea {
 
 @media (max-width: 480px) {
   .section { padding: 0 var(--sp-3); }
+}
+
+/* ─── MOBILE MICRO INTERACTIONS ─── */
+@media (max-width: 768px) {
+  .btn-primary,
+  .btn-ghost {
+    transition: transform 0.1s ease !important;
+  }
+  .btn-primary:active,
+  .btn-ghost:active {
+    transform: scale(0.97) !important;
+  }
 }

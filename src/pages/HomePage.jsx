@@ -415,12 +415,12 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
       <div style={{ paddingTop: 64 }}>
 
         {/* ═══ HERO ═══ */}
-        <section style={{
+        <section className="hero-section" style={{
           position: 'relative', minHeight: '92vh', display: 'flex', alignItems: 'center',
           justifyContent: 'center', overflow: 'hidden', textAlign: 'center',
         }}>
           {/* Animated gradient orbs */}
-          <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+          <div className="hero-orbs" style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
             <div style={{
               position: 'absolute', width: '60vw', height: '60vw', maxWidth: 700, maxHeight: 700,
               borderRadius: '50%', top: '-10%', left: '15%',
@@ -449,6 +449,7 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
+              className="hero-label"
               style={{
                 fontFamily: 'var(--mono)', fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-wider)',
                 color: 'var(--accent)', marginBottom: 28, textTransform: 'uppercase', fontWeight: 600,
@@ -460,6 +461,7 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              className="hero-title"
               style={{
                 fontSize: 'var(--text-hero)', fontWeight: 900, lineHeight: 0.92,
                 letterSpacing: '-0.04em', marginBottom: 28,
@@ -473,9 +475,10 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35 }}
+              className="hero-tagline"
               style={{
-                fontSize: 'var(--text-lg)', color: 'var(--text-secondary)', marginBottom: 48,
-                fontWeight: 300, lineHeight: 'var(--leading-normal)', maxWidth: 500, margin: '0 auto 48px',
+                fontSize: 'var(--text-lg)', color: 'var(--text-secondary)',
+                fontWeight: 300, lineHeight: 'var(--leading-normal)', maxWidth: 500, margin: '0 auto 40px',
               }}
             >
               Beats that move the world. Listen first, vibe always.
@@ -490,7 +493,7 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => { if (trending[0]) playBeat(trending[0], beats); }}
-                className="btn-primary"
+                className="btn-primary hero-cta-btn"
                 style={{
                   padding: '18px 44px', fontSize: 'var(--text-base)', fontWeight: 600,
                   display: 'flex', alignItems: 'center', gap: 10,
@@ -501,7 +504,7 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
               </motion.button>
               <Link
                 to="/beats"
-                className="btn-ghost"
+                className="btn-ghost hero-cta-btn"
                 style={{
                   padding: '18px 44px', fontSize: 'var(--text-base)',
                   textDecoration: 'none', display: 'inline-flex', alignItems: 'center',
@@ -510,16 +513,36 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
                 Browse Catalog
               </Link>
             </motion.div>
-          </div>
 
-          {/* Hero waveform */}
-          <div style={{
-            position: 'absolute', bottom: 64, left: '50%', transform: 'translateX(-50%)',
-            width: '100%', maxWidth: 600, padding: '0 24px',
-          }}>
-            <HeroWaveform isPlaying={isPlaying} color={currentBeat?.cover_color || '#E84393'} />
+            {/* Subtle waveform hint below CTA */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7, duration: 1 }}
+              className="hero-waveform"
+              style={{ marginTop: 48 }}
+            >
+              <HeroWaveform isPlaying={isPlaying} color={currentBeat?.cover_color || '#E84393'} />
+            </motion.div>
           </div>
         </section>
+
+        {/* Hero mobile overrides */}
+        <style>{`
+          @media (max-width: 768px) {
+            .hero-section {
+              min-height: auto !important;
+              padding-top: 32px !important;
+              padding-bottom: 24px !important;
+            }
+            .hero-orbs { opacity: 0.5; }
+            .hero-label { margin-bottom: 12px !important; }
+            .hero-title { margin-bottom: 10px !important; }
+            .hero-tagline { margin: 0 auto 20px !important; font-size: var(--text-base) !important; }
+            .hero-cta-btn { padding: 14px 28px !important; font-size: var(--text-sm) !important; }
+            .hero-waveform { margin-top: 24px !important; }
+          }
+        `}</style>
 
         {/* ═══ MARQUEE ═══ */}
         <MarqueeTicker items={[
@@ -530,27 +553,34 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
 
         {/* ═══ STATS ═══ */}
         <RevealSection>
-          <section style={{ maxWidth: 1280, margin: '0 auto', padding: '80px 24px' }}>
-            <div style={{
+          <section className="stats-section" style={{ maxWidth: 1280, margin: '0 auto', padding: '80px 24px' }}>
+            <div className="stats-grid" style={{
               display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 1,
               background: 'var(--border)', borderRadius: 'var(--radius-xl)', overflow: 'hidden',
             }}>
               {[
-                { label: 'Total Beats', value: beats.length, suffix: '+' },
-                { label: 'Total Plays', value: totalPlays, suffix: '' },
-                { label: 'Collections', value: playlists.length, suffix: '' },
+                { label: 'Total Beats', value: beats.length, suffix: '+', icon: '\uD83C\uDFB5' },
+                { label: 'Total Plays', value: totalPlays, suffix: '', icon: '\uD83D\uDD25' },
+                { label: 'Collections', value: playlists.length, suffix: '', icon: '\uD83D\uDCBF' },
               ].map((stat) => (
-                <div key={stat.label} style={{
+                <div key={stat.label} className="stat-card" style={{
                   textAlign: 'center', padding: '40px 24px', background: 'var(--bg-card)',
                 }}>
-                  <div style={{
+                  <div className="stat-icon" style={{ fontSize: 28, marginBottom: 12, lineHeight: 1 }}>
+                    {stat.icon}
+                  </div>
+                  <div className="stat-number" style={{
                     fontSize: 'var(--text-4xl)', fontWeight: 800, marginBottom: 6,
                     background: 'linear-gradient(135deg, var(--accent), var(--accent-purple))',
                     WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                    textShadow: '0 0 30px rgba(232,67,147,0.3)',
                   }}>
                     <AnimatedCounter target={stat.value} suffix={stat.suffix} />
                   </div>
-                  <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: 'var(--tracking-wide)' }}>
+                  <div className="stat-label" style={{
+                    fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600,
+                    textTransform: 'uppercase', letterSpacing: 'var(--tracking-wider)',
+                  }}>
                     {stat.label}
                   </div>
                 </div>
@@ -558,6 +588,37 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
             </div>
           </section>
         </RevealSection>
+
+        {/* Stats mobile overrides */}
+        <style>{`
+          @media (max-width: 768px) {
+            .stats-section {
+              padding: 56px 16px !important;
+            }
+            .stats-grid {
+              grid-template-columns: 1fr 1fr !important;
+              gap: 1px !important;
+              border-radius: var(--radius) !important;
+            }
+            .stat-card {
+              padding: 28px 16px !important;
+            }
+            .stat-card:last-child {
+              grid-column: 1 / -1;
+            }
+            .stat-icon {
+              font-size: 22px !important;
+              margin-bottom: 8px !important;
+            }
+            .stat-number {
+              font-size: var(--text-3xl) !important;
+            }
+            .stat-label {
+              font-size: 10px !important;
+              letter-spacing: 0.14em !important;
+            }
+          }
+        `}</style>
 
         {/* ═══ FEATURED ═══ */}
         {featured.length > 0 && (
