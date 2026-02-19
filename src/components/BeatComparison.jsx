@@ -52,7 +52,7 @@ export default function BeatComparison({ beats, onClose, onPlay, currentBeat, is
         <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 1fr', gap: 16, marginBottom: 24 }}>
           <div />
           {[a, b].map((beat) => {
-            const color = beat.cover_color || '#E84393';
+            const color = beat.cover_color || '#FFD800';
             const active = currentBeat?.id === beat.id && isPlaying;
             return (
               <div key={beat.id} style={{ textAlign: 'center' }}>

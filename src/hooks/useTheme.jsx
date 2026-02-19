@@ -4,16 +4,18 @@ const ThemeContext = createContext(null);
 
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(() => {
-    if (typeof window === 'undefined') return 'dark';
-    const stored = localStorage.getItem('ajk-theme');
+    if (typeof window === 'undefined') return 'light';
+    const stored = localStorage.getItem('ajk-theme-v2');
     if (stored) return stored;
-    if (window.matchMedia?.('(prefers-color-scheme: light)').matches) return 'light';
-    return 'dark';
+    // Clear legacy key from before the light-theme redesign
+    localStorage.removeItem('ajk-theme');
+    if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) return 'dark';
+    return 'light';
   });
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('ajk-theme', theme);
+    localStorage.setItem('ajk-theme-v2', theme);
   }, [theme]);
 
   const toggleTheme = useCallback(() => {

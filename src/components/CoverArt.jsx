@@ -99,7 +99,7 @@ export default function CoverArt({
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
-  const color = beat.cover_color || beat.coverColor || '#E84393';
+  const color = beat.cover_color || beat.coverColor || '#FFD800';
   const hasImage = !!beat.cover_art_url;
   const shouldZoom = kenBurns && (hovered || isPlaying);
 
@@ -114,12 +114,7 @@ export default function CoverArt({
         borderRadius,
         overflow: 'hidden',
         cursor: onClick ? 'pointer' : 'default',
-        boxShadow:
-          showGlow && isPlaying && isActive
-            ? `0 0 40px ${color}44, 0 0 80px ${color}22`
-            : showGlow && hovered
-              ? `0 8px 32px ${color}22`
-              : 'none',
+        boxShadow: 'var(--shadow)',
         transition: 'box-shadow 0.5s ease',
         ...customStyle,
       }}
@@ -150,13 +145,16 @@ export default function CoverArt({
           src={beat.cover_art_url}
           alt={beat.title}
           loading="lazy"
+          width={typeof size === 'number' ? size : 260}
+          height={typeof size === 'number' ? size : 260}
           onLoad={() => setImgLoaded(true)}
           style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%',
             objectFit: 'cover',
-            opacity: imgLoaded ? 1 : 0,
+            opacity: imgLoaded ? 1 : 0.4,
+            filter: imgLoaded ? 'blur(0px)' : 'blur(12px)',
             transform: shouldZoom ? 'scale(1.08)' : 'scale(1)',
-            transition: `opacity 0.6s ease, transform ${isPlaying ? '12s' : '0.6s'} ease`,
+            transition: `opacity 0.6s ease, filter 0.6s ease, transform ${isPlaying ? '12s' : '0.6s'} ease`,
           }}
         />
       )}
@@ -174,16 +172,6 @@ export default function CoverArt({
         }}>
           {beat.cover_emoji || beat.coverEmoji || '🎵'}
         </div>
-      )}
-
-      {/* Ambient glow pulse (playing) */}
-      {showGlow && isPlaying && isActive && (
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: `radial-gradient(circle at center, ${color}15, transparent 70%)`,
-          animation: 'coverGlowPulse 2s ease-in-out infinite',
-          zIndex: 2, pointerEvents: 'none',
-        }} />
       )}
 
       {/* Children (overlays, badges) */}

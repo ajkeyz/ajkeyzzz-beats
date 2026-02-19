@@ -88,7 +88,7 @@ export default function ContactPage() {
               <input
                 placeholder="Your name *"
                 value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
                 style={{ ...inputStyle, borderColor: errors.name ? '#D63031' : 'var(--border)' }}
               />
               {errors.name && <span style={{ fontSize: 11, color: '#D63031' }}>{errors.name}</span>}
@@ -99,7 +99,7 @@ export default function ContactPage() {
                 placeholder="Your email *"
                 type="email"
                 value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                onChange={(e) => setForm(prev => ({ ...prev, email: e.target.value }))}
                 style={{ ...inputStyle, borderColor: errors.email ? '#D63031' : 'var(--border)' }}
               />
               {errors.email && <span style={{ fontSize: 11, color: '#D63031' }}>{errors.email}</span>}
@@ -110,7 +110,7 @@ export default function ContactPage() {
             <input
               placeholder="Subject (optional)"
               value={form.subject}
-              onChange={(e) => setForm({ ...form, subject: e.target.value })}
+              onChange={(e) => setForm(prev => ({ ...prev, subject: e.target.value }))}
               style={inputStyle}
             />
           </div>
@@ -119,7 +119,7 @@ export default function ContactPage() {
             <textarea
               placeholder="Your message... *"
               value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })}
+              onChange={(e) => setForm(prev => ({ ...prev, message: e.target.value }))}
               rows={6}
               style={{ ...inputStyle, resize: 'vertical', borderColor: errors.message ? '#D63031' : 'var(--border)' }}
             />

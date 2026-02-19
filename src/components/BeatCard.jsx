@@ -1,10 +1,10 @@
 import { useState, useRef, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Icons from './Icons';
 import CoverArt from './CoverArt';
-import TiltCard from './TiltCard';
-import { formatTime } from '../lib/utils';
+
+import { formatTime, haptic } from '../lib/utils';
 import { MOOD_OPTIONS } from '../lib/seeds';
 
 const moodColorMap = Object.fromEntries(MOOD_OPTIONS.map(m => [m.name, m.color]));
@@ -13,8 +13,10 @@ export default memo(function BeatCard({ beat, index, playBeat, currentBeat, isPl
   const navigate = useNavigate();
   const isActive = currentBeat?.id === beat.id;
   const [hovered, setHovered] = useState(false);
-  const color = beat.cover_color || beat.coverColor || '#E84393';
+  const color = beat.cover_color || beat.coverColor || '#FFD800';
 
+  const [showActions, setShowActions] = useState(false);
+  const longPressTimer = useRef(null);
   const hoverTimer = useRef(null);
   const previewAudio = useRef(null);
 
@@ -45,7 +47,7 @@ export default memo(function BeatCard({ beat, index, playBeat, currentBeat, isPl
   };
 
   return (
-    <TiltCard
+    <div
       className={`beat-card fade-in fade-in-${(index % 4) + 1}`}
       style={{
         background: 'var(--bg-card)', borderRadius: 'var(--radius)', overflow: 'hidden',
@@ -53,10 +55,13 @@ export default memo(function BeatCard({ beat, index, playBeat, currentBeat, isPl
         cursor: 'pointer', position: 'relative',
         transition: 'border-color var(--duration-normal) var(--ease-out)',
       }}
+      onTouchStart={() => {
+        longPressTimer.current = setTimeout(() => setShowActions(true), 500);
+      }}
+      onTouchEnd={() => clearTimeout(longPressTimer.current)}
+      onTouchMove={() => clearTimeout(longPressTimer.current)}
     >
-      <motion.div
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      <div
         onClick={handleCardClick}
         onMouseEnter={() => { setHovered(true); startHoverPreview(); }}
         onMouseLeave={() => { setHovered(false); stopHoverPreview(); }}
@@ -115,10 +120,10 @@ export default memo(function BeatCard({ beat, index, playBeat, currentBeat, isPl
               style={{
                 position: 'absolute', top: 10, right: 10,
                 background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)',
-                padding: '4px 10px', borderRadius: 'var(--radius-pill)',
+                padding: '6px 12px', borderRadius: 'var(--radius-pill)', minHeight: 32,
                 fontSize: 'var(--text-xs)', fontWeight: 600, fontFamily: 'var(--mono)', color: '#fff',
                 cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
-                animation: isActive && isPlaying ? 'bpmPulse 1s ease-in-out infinite' : 'none',
+                animation: 'none',
                 transition: 'background var(--duration-fast)',
               }}
               onMouseEnter={(e) => e.currentTarget.style.background = `${color}CC`}
@@ -136,7 +141,7 @@ export default memo(function BeatCard({ beat, index, playBeat, currentBeat, isPl
                 style={{
                   position: 'absolute', top: 10, left: onCompare ? 44 : 10,
                   background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)',
-                  padding: '4px 10px', borderRadius: 'var(--radius-pill)',
+                  padding: '6px 12px', borderRadius: 'var(--radius-pill)', minHeight: 32,
                   fontSize: 'var(--text-xs)', fontWeight: 600, fontFamily: 'var(--mono)', color: '#fff',
                   cursor: 'pointer', transition: 'background var(--duration-fast)',
                 }}
@@ -160,7 +165,7 @@ export default memo(function BeatCard({ beat, index, playBeat, currentBeat, isPl
           {/* Mobile-only: center play button overlay */}
           <button
             className="beat-card-play"
-            onClick={(e) => { e.stopPropagation(); playBeat(beat); }}
+            onClick={(e) => { e.stopPropagation(); haptic(); playBeat(beat); }}
             aria-label={isActive && isPlaying ? 'Pause' : 'Play'}
             style={{
               display: 'none', /* hidden by default, shown via media query */
@@ -179,7 +184,7 @@ export default memo(function BeatCard({ beat, index, playBeat, currentBeat, isPl
           {/* Mobile-only: heart overlay on top-right of cover */}
           <button
             className="beat-card-heart"
-            onClick={(e) => { e.stopPropagation(); toggleLike?.(); }}
+            onClick={(e) => { e.stopPropagation(); haptic(); toggleLike?.(); }}
             aria-label={liked ? 'Unlike' : 'Like'}
             style={{
               display: 'none', /* hidden by default, shown via media query */
@@ -188,7 +193,7 @@ export default memo(function BeatCard({ beat, index, playBeat, currentBeat, isPl
               background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)',
               border: 'none',
               cursor: 'pointer', alignItems: 'center', justifyContent: 'center',
-              color: liked ? '#E84393' : '#fff',
+              color: liked ? '#FFD800' : '#fff',
             }}
           >
             <Icons.Heart filled={liked} />
@@ -207,7 +212,7 @@ export default memo(function BeatCard({ beat, index, playBeat, currentBeat, isPl
             {/* Desktop-only heart (hidden on mobile via class) */}
             <button
               className="beat-card-heart-desktop"
-              onClick={(e) => { e.stopPropagation(); toggleLike?.(); }}
+              onClick={(e) => { e.stopPropagation(); haptic(); toggleLike?.(); }}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex', flexShrink: 0 }}
               aria-label={liked ? 'Unlike' : 'Like'}
             >
@@ -264,7 +269,73 @@ export default memo(function BeatCard({ beat, index, playBeat, currentBeat, isPl
             </button>
           </div>
         </div>
-      </motion.div>
+      </div>
+
+      {/* Mobile action sheet */}
+      <AnimatePresence>
+        {showActions && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowActions(false)}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 2000,
+              background: 'rgba(0,0,0,0.5)',
+              display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+            }}
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                background: 'var(--bg-card)', borderRadius: '20px 20px 0 0',
+                padding: '20px 24px', paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
+                width: '100%', maxWidth: 420,
+                border: '1px solid var(--border)', borderBottom: 'none',
+              }}
+            >
+              <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 16px' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: 8, flexShrink: 0,
+                  background: beat.cover_art_url ? `url(${beat.cover_art_url}) center/cover` : `linear-gradient(135deg, ${color}33, ${color}11)`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
+                }}>
+                  {!beat.cover_art_url && (beat.cover_emoji || '🎵')}
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: 15 }}>{beat.title}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{beat.genre} · {beat.bpm} BPM</div>
+                </div>
+              </div>
+              {[
+                { icon: <Icons.Play />, label: isActive && isPlaying ? 'Pause' : 'Play', action: () => playBeat(beat) },
+                { icon: <Icons.Heart />, label: liked ? 'Unlike' : 'Like', action: () => toggleLike() },
+                { icon: <Icons.Music />, label: 'License Beat', action: () => onLicense?.() },
+                { icon: <Icons.ExternalLink />, label: 'View Details', action: () => navigate(`/beats/${beat.slug}`) },
+              ].map(item => (
+                <button
+                  key={item.label}
+                  onClick={() => { item.action(); setShowActions(false); }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 12, width: '100%',
+                    padding: '14px 0', background: 'none', border: 'none',
+                    borderTop: '1px solid var(--border)', color: 'var(--text-primary)',
+                    fontSize: 15, cursor: 'pointer', fontFamily: 'var(--font)', textAlign: 'left',
+                  }}
+                >
+                  <span style={{ color: 'var(--text-muted)', display: 'flex' }}>{item.icon}</span>
+                  {item.label}
+                </button>
+              ))}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Mobile overrides */}
       <style>{`
@@ -356,6 +427,6 @@ export default memo(function BeatCard({ beat, index, playBeat, currentBeat, isPl
           }
         }
       `}</style>
-    </TiltCard>
+    </div>
   );
 })

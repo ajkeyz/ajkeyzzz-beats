@@ -26,8 +26,12 @@ export default function useAudioPlayer() {
   const fadeOutRef = useRef(null);
   const fadeInRef = useRef(null);
   const volumeRef = useRef(volume);
+  const queueRef = useRef(queue);
+  const repeatRef = useRef(repeat);
 
   useEffect(() => { volumeRef.current = volume; }, [volume]);
+  useEffect(() => { queueRef.current = queue; }, [queue]);
+  useEffect(() => { repeatRef.current = repeat; }, [repeat]);
 
   const addToHistory = useCallback((beat) => {
     if (!beat) return;
@@ -52,15 +56,17 @@ export default function useAudioPlayer() {
     };
     const onLoadedMetadata = () => { setDuration(audio.duration); setLoading(false); };
     const onEnded = () => {
-      if (repeat === 'one') {
+      const curRepeat = repeatRef.current;
+      const curQueue = queueRef.current;
+      if (curRepeat === 'one') {
         audio.currentTime = 0;
         audio.play().catch(() => {});
         setProgress(0); setCurrentTime(0);
         return;
       }
-      if (repeat === 'all') {
-        if (queue.length > 0) {
-          const [next, ...rest] = queue;
+      if (curRepeat === 'all') {
+        if (curQueue.length > 0) {
+          const [next, ...rest] = curQueue;
           setQueue(rest);
           loadAndPlay(next);
         } else {
@@ -71,8 +77,8 @@ export default function useAudioPlayer() {
         return;
       }
       setIsPlaying(false); setProgress(0); setCurrentTime(0);
-      if (queue.length > 0) {
-        const [next, ...rest] = queue;
+      if (curQueue.length > 0) {
+        const [next, ...rest] = curQueue;
         setQueue(rest);
         loadAndPlay(next);
       }
@@ -96,7 +102,8 @@ export default function useAudioPlayer() {
       audio.removeEventListener('waiting', onWaiting);
       audio.removeEventListener('canplay', onCanPlay);
     };
-  }, [queue, repeat]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => { audioRef.current.volume = volume; }, [volume]);
 
@@ -169,14 +176,16 @@ export default function useAudioPlayer() {
         const next = prev + 0.5;
         if (next >= dur) {
           clearInterval(simulationRef.current);
-          if (repeat === 'one') {
+          const curRepeat = repeatRef.current;
+          const curQueue = queueRef.current;
+          if (curRepeat === 'one') {
             setProgress(0);
             startSimulation(dur);
             return 0;
           }
-          if (repeat === 'all') {
-            if (queue.length > 0) {
-              const [nextBeat, ...rest] = queue; setQueue(rest); loadAndPlay(nextBeat);
+          if (curRepeat === 'all') {
+            if (curQueue.length > 0) {
+              const [nextBeat, ...rest] = curQueue; setQueue(rest); loadAndPlay(nextBeat);
             } else {
               setProgress(0);
               startSimulation(dur);
@@ -185,14 +194,14 @@ export default function useAudioPlayer() {
             return 0;
           }
           setIsPlaying(false); setProgress(0);
-          if (queue.length > 0) { const [nextBeat, ...rest] = queue; setQueue(rest); loadAndPlay(nextBeat); }
+          if (curQueue.length > 0) { const [nextBeat, ...rest] = curQueue; setQueue(rest); loadAndPlay(nextBeat); }
           return 0;
         }
         setProgress((next / dur) * 100);
         return next;
       });
     }, 500);
-  }, [queue, loadAndPlay, repeat]);
+  }, [loadAndPlay]);
 
   const stopSimulation = useCallback(() => { clearInterval(simulationRef.current); }, []);
 

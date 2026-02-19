@@ -17,7 +17,7 @@ export default function BeatEditor() {
 
   const [form, setForm] = useState({
     title: '', genre: 'Alté', bpm: 120, musical_key: '', typebeat: '',
-    tags: '', moods: [], description: '', cover_color: '#E84393', cover_emoji: '🎵',
+    tags: '', moods: [], description: '', cover_color: '#FFD800', cover_emoji: '🎵',
     price_basic: 29.99, price_premium: 99.99, price_unlimited: 149.99, price_exclusive: 299.99,
     featured: false, published: true, playlist: 'alte',
   });
@@ -101,7 +101,7 @@ export default function BeatEditor() {
           tags: (beat.tags || []).join(', '),
           moods: beat.moods || [],
           description: beat.description || '',
-          cover_color: beat.cover_color || '#E84393',
+          cover_color: beat.cover_color || '#FFD800',
           cover_emoji: beat.cover_emoji || '🎵',
           price_basic: beat.price_basic ?? 29.99,
           price_premium: beat.price_premium ?? 99.99,

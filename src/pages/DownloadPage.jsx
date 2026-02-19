@@ -105,7 +105,7 @@ export default function DownloadPage() {
   }
 
   const beat = order.beats || {};
-  const color = beat.cover_color || '#E84393';
+  const color = beat.cover_color || '#FFD800';
   const tierLabels = { basic: 'Basic Lease', premium: 'Premium Lease', unlimited: 'Unlimited Lease', exclusive: 'Exclusive' };
   const tierLabel = tierLabels[order.license_tier] || order.license_tier;
   const hasStems = (order.license_tier === 'unlimited' || order.license_tier === 'exclusive') && beat.stems_url;

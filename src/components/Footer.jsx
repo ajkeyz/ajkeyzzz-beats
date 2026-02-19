@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Icons from './Icons';
+import { localStore } from '../lib/store';
 
 export default function Footer() {
+  const [logoUrl] = useState(() => localStore.getLogoUrl());
   return (
     <footer style={{
       borderTop: '1px solid var(--border)', padding: '48px 24px 0',
@@ -20,7 +23,11 @@ export default function Footer() {
             letterSpacing: 2, color: 'var(--accent)', textDecoration: 'none',
             display: 'block', marginBottom: 8,
           }}>
-            AJKEYZZZ
+            {logoUrl ? (
+              <img src={logoUrl} alt="AJKEYZZZ" style={{ height: 56, objectFit: 'contain' }} />
+            ) : (
+              'AJKEYZZZ'
+            )}
           </Link>
           <div style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 16 }}>
             From Lagos to Cali — beats that move the world

@@ -120,7 +120,7 @@ export default function CustomPage() {
                 <label style={labelStyle}>Name *</label>
                 <input
                   value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
                   style={{ ...inputStyle, borderColor: errors.name ? '#D63031' : 'var(--border)' }}
                   placeholder="Your name"
                 />
@@ -131,7 +131,7 @@ export default function CustomPage() {
                 <input
                   type="email"
                   value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  onChange={(e) => setForm(prev => ({ ...prev, email: e.target.value }))}
                   style={{ ...inputStyle, borderColor: errors.email ? '#D63031' : 'var(--border)' }}
                   placeholder="you@example.com"
                 />
@@ -143,7 +143,7 @@ export default function CustomPage() {
               <label style={labelStyle}>Type of Project</label>
               <select
                 value={form.inquiry_type}
-                onChange={(e) => setForm({ ...form, inquiry_type: e.target.value })}
+                onChange={(e) => setForm(prev => ({ ...prev, inquiry_type: e.target.value }))}
                 style={{ ...inputStyle, cursor: 'pointer' }}
               >
                 <option value="custom_beat">Custom Beat</option>
@@ -159,7 +159,7 @@ export default function CustomPage() {
                 <label style={labelStyle}>Budget Range</label>
                 <select
                   value={form.budget}
-                  onChange={(e) => setForm({ ...form, budget: e.target.value })}
+                  onChange={(e) => setForm(prev => ({ ...prev, budget: e.target.value }))}
                   style={{ ...inputStyle, cursor: 'pointer' }}
                 >
                   <option value="">Select budget range</option>
@@ -174,7 +174,7 @@ export default function CustomPage() {
                 <label style={labelStyle}>Timeline</label>
                 <select
                   value={form.timeline}
-                  onChange={(e) => setForm({ ...form, timeline: e.target.value })}
+                  onChange={(e) => setForm(prev => ({ ...prev, timeline: e.target.value }))}
                   style={{ ...inputStyle, cursor: 'pointer' }}
                 >
                   <option value="">Select timeline</option>
@@ -191,7 +191,7 @@ export default function CustomPage() {
               <label style={labelStyle}>Reference Links (songs, beats, artists)</label>
               <input
                 value={form.reference_links}
-                onChange={(e) => setForm({ ...form, reference_links: e.target.value })}
+                onChange={(e) => setForm(prev => ({ ...prev, reference_links: e.target.value }))}
                 style={inputStyle}
                 placeholder="Paste YouTube, Spotify, or SoundCloud links"
               />
@@ -201,7 +201,7 @@ export default function CustomPage() {
               <label style={labelStyle}>Platform / Intended Use</label>
               <input
                 value={form.platform}
-                onChange={(e) => setForm({ ...form, platform: e.target.value })}
+                onChange={(e) => setForm(prev => ({ ...prev, platform: e.target.value }))}
                 style={inputStyle}
                 placeholder="e.g., Spotify release, YouTube video, film project"
               />
@@ -211,7 +211,7 @@ export default function CustomPage() {
               <input
                 type="checkbox"
                 checked={form.vocals_needed}
-                onChange={(e) => setForm({ ...form, vocals_needed: e.target.checked })}
+                onChange={(e) => setForm(prev => ({ ...prev, vocals_needed: e.target.checked }))}
               />
               I need vocal production / toplining
             </label>
@@ -220,7 +220,7 @@ export default function CustomPage() {
               <label style={labelStyle}>Project Details *</label>
               <textarea
                 value={form.message}
-                onChange={(e) => setForm({ ...form, message: e.target.value })}
+                onChange={(e) => setForm(prev => ({ ...prev, message: e.target.value }))}
                 rows={5}
                 style={{ ...inputStyle, resize: 'vertical', borderColor: errors.message ? '#D63031' : 'var(--border)' }}
                 placeholder="Describe your vision, vibe, mood, and any specific requirements..."
@@ -247,7 +247,7 @@ export default function CustomPage() {
         {/* Direct contact */}
         <div style={{
           marginTop: 40, textAlign: 'center', padding: 32,
-          background: 'linear-gradient(135deg, rgba(232,67,147,0.08), rgba(108,92,231,0.08))',
+          background: 'linear-gradient(135deg, rgba(255,216,0,0.08), rgba(108,92,231,0.08))',
           borderRadius: 'var(--radius)', border: '1px solid var(--border)',
         }}>
           <p style={{ color: 'var(--text-secondary)', marginBottom: 16, fontSize: 15 }}>

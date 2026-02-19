@@ -54,11 +54,14 @@ export default function AdminBeats() {
   const bulkDelete = async () => {
     if (selectedIds.size === 0) return;
     if (!confirm(`Delete ${selectedIds.size} beat(s)? This cannot be undone.`)) return;
+    const failed = [];
     for (const id of selectedIds) {
-      try { await deleteBeatApi(id); } catch (_) {}
+      try { await deleteBeatApi(id); } catch (_) { failed.push(id); }
     }
-    setBeats(prev => prev.filter(b => !selectedIds.has(b.id)));
+    const failedSet = new Set(failed);
+    setBeats(prev => prev.filter(b => !selectedIds.has(b.id) || failedSet.has(b.id)));
     setSelectedIds(new Set());
+    if (failed.length > 0) alert(`${failed.length} beat(s) failed to delete.`);
   };
 
   const bulkToggleFeatured = async () => {
@@ -228,7 +231,7 @@ export default function AdminBeats() {
                   width: 44, height: 44, borderRadius: 8, flexShrink: 0,
                   background: beat.cover_art_url
                     ? `url(${beat.cover_art_url}) center/cover`
-                    : `linear-gradient(135deg, ${beat.cover_color || '#E84393'}33, ${beat.cover_color || '#E84393'}11)`,
+                    : `linear-gradient(135deg, ${beat.cover_color || '#FFD800'}33, ${beat.cover_color || '#FFD800'}11)`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
                 }}>
                   {!beat.cover_art_url && (beat.cover_emoji || '🎵')}

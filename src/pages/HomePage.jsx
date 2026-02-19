@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
@@ -8,6 +8,7 @@ import Footer from '../components/Footer';
 import Icons from '../components/Icons';
 import { SkeletonCard } from '../components/SkeletonCard';
 import { fetchBeats, fetchCollections } from '../lib/data';
+import { localStore } from '../lib/store';
 
 // ─── SCROLL-TRIGGERED SECTION WRAPPER ───
 function RevealSection({ children, delay = 0, className = '' }) {
@@ -66,23 +67,32 @@ function SectionHeading({ label, title, subtitle, action, actionTo }) {
 function AnimatedCounter({ target, suffix = '', duration = 2000 }) {
   const [count, setCount] = useState(0);
   const ref = useRef(null);
-  const hasAnimated = useRef(false);
+  const prevTarget = useRef(0);
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current || target === 0) return;
+    // If target hasn't changed, skip
+    if (target === prevTarget.current) return;
+    prevTarget.current = target;
+
+    const runAnimation = () => {
+      const start = performance.now();
+      const animate = (now) => {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setCount(Math.floor(eased * target));
+        if (progress < 1) requestAnimationFrame(animate);
+      };
+      requestAnimationFrame(animate);
+    };
+
+    // If already visible, animate immediately; otherwise wait for intersection
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated.current) {
-          hasAnimated.current = true;
-          const start = performance.now();
-          const animate = (now) => {
-            const elapsed = now - start;
-            const progress = Math.min(elapsed / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
-            setCount(Math.floor(eased * target));
-            if (progress < 1) requestAnimationFrame(animate);
-          };
-          requestAnimationFrame(animate);
+        if (entry.isIntersecting) {
+          observer.disconnect();
+          runAnimation();
         }
       },
       { threshold: 0.3 }
@@ -95,7 +105,7 @@ function AnimatedCounter({ target, suffix = '', duration = 2000 }) {
 }
 
 // ─── LIVE WAVEFORM VISUALIZER ───
-function HeroWaveform({ isPlaying, color = '#E84393' }) {
+function HeroWaveform({ isPlaying, color = '#FFD800' }) {
   const canvasRef = useRef(null);
   const animRef = useRef(null);
 
@@ -153,7 +163,7 @@ function HeroWaveform({ isPlaying, color = '#E84393' }) {
 }
 
 // ─── FEATURED CAROUSEL ───
-function FeaturedCarousel({ beats, playBeat, currentBeat, isPlaying }) {
+const FeaturedCarousel = memo(function FeaturedCarousel({ beats, playBeat, currentBeat, isPlaying }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const timerRef = useRef(null);
 
@@ -175,7 +185,7 @@ function FeaturedCarousel({ beats, playBeat, currentBeat, isPlaying }) {
 
   if (beats.length === 0) return null;
   const beat = beats[activeIndex];
-  const color = beat?.cover_color || '#E84393';
+  const color = beat?.cover_color || '#FFD800';
   const isActive = currentBeat?.id === beat?.id;
 
   return (
@@ -295,7 +305,7 @@ function FeaturedCarousel({ beats, playBeat, currentBeat, isPlaying }) {
       `}</style>
     </div>
   );
-}
+});
 
 // ─── MARQUEE TICKER ───
 function MarqueeTicker({ items }) {
@@ -321,7 +331,7 @@ function MarqueeTicker({ items }) {
 }
 
 // ─── QUICK ACCESS BEAT ROW ───
-function QuickAccessRow({ title, subtitle, beats, playBeat, currentBeat, isPlaying, likedBeats, toggleLike, openLicensing, allBeats }) {
+const QuickAccessRow = memo(function QuickAccessRow({ title, subtitle, beats, playBeat, currentBeat, isPlaying, likedBeats, toggleLike, openLicensing, allBeats }) {
   const scrollRef = useRef(null);
 
   if (beats.length === 0) return null;
@@ -337,6 +347,18 @@ function QuickAccessRow({ title, subtitle, beats, playBeat, currentBeat, isPlayi
             <h3 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, letterSpacing: 'var(--tracking-tight)' }}>{title}</h3>
             {subtitle && <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</p>}
           </div>
+          <button
+            onClick={() => { if (beats.length > 0) playBeat(beats[0], beats); }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
+              background: 'var(--accent)', border: 'none', borderRadius: 50,
+              color: '#000', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+              fontFamily: 'var(--font)', flexShrink: 0,
+            }}
+            aria-label={`Play all ${title}`}
+          >
+            <Icons.Play /> Play All
+          </button>
         </div>
         <div
           ref={scrollRef}
@@ -365,7 +387,7 @@ function QuickAccessRow({ title, subtitle, beats, playBeat, currentBeat, isPlayi
       </div>
     </RevealSection>
   );
-}
+});
 
 // ─── TESTIMONIALS ───
 const TESTIMONIALS = [
@@ -379,11 +401,13 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
   const [beats, setBeats] = useState([]);
   const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [heroBg, setHeroBg] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchBeats().then((data) => { setBeats(data); setLoading(false); });
-    fetchCollections().then(setCollections);
+    fetchBeats().then((data) => { setBeats(data); setLoading(false); }).catch(() => setLoading(false));
+    fetchCollections().then(setCollections).catch(() => {});
+    setHeroBg(localStore.getHeroBg());
   }, []);
 
   const featured = beats.filter((b) => b.featured);
@@ -416,131 +440,81 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
 
         {/* ═══ HERO ═══ */}
         <section className="hero-section" style={{
-          position: 'relative', minHeight: '92vh', display: 'flex', alignItems: 'center',
+          position: 'relative', minHeight: '65vh', display: 'flex', alignItems: 'center',
           justifyContent: 'center', overflow: 'hidden', textAlign: 'center',
+          background: heroBg ? '#1a1a1a' : 'linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.7)), #1a1a1a',
         }}>
-          {/* Animated gradient orbs */}
-          <div className="hero-orbs" style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
-            <div style={{
-              position: 'absolute', width: '60vw', height: '60vw', maxWidth: 700, maxHeight: 700,
-              borderRadius: '50%', top: '-10%', left: '15%',
-              background: 'radial-gradient(circle, rgba(232,67,147,0.15) 0%, transparent 70%)',
-              animation: 'heroGradient 12s ease-in-out infinite',
-              filter: 'blur(60px)',
+          {/* Animated background image */}
+          {heroBg && (
+            <div className="hero-bg-image" style={{
+              position: 'absolute', inset: '-2%',
+              backgroundImage: `url(${heroBg})`,
+              backgroundSize: 'cover', backgroundPosition: 'center',
+              animation: 'heroPan 25s ease-in-out infinite alternate',
             }} />
+          )}
+          {/* Dark overlay on top of image */}
+          {heroBg && (
             <div style={{
-              position: 'absolute', width: '50vw', height: '50vw', maxWidth: 600, maxHeight: 600,
-              borderRadius: '50%', bottom: '0%', right: '10%',
-              background: 'radial-gradient(circle, rgba(108,92,231,0.12) 0%, transparent 70%)',
-              animation: 'heroGradient2 15s ease-in-out infinite',
-              filter: 'blur(60px)',
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.6))',
+              zIndex: 0,
             }} />
-            <div style={{
-              position: 'absolute', width: '40vw', height: '40vw', maxWidth: 500, maxHeight: 500,
-              borderRadius: '50%', top: '40%', left: '60%',
-              background: 'radial-gradient(circle, rgba(9,132,227,0.08) 0%, transparent 70%)',
-              animation: 'heroGradient 18s ease-in-out infinite reverse',
-              filter: 'blur(60px)',
-            }} />
-          </div>
-
+          )}
           <div style={{ position: 'relative', zIndex: 1, padding: '0 24px', maxWidth: 860 }}>
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="hero-label"
-              style={{
-                fontFamily: 'var(--mono)', fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-wider)',
-                color: 'var(--accent)', marginBottom: 28, textTransform: 'uppercase', fontWeight: 600,
-              }}
-            >
-              From Lagos to Cali
-            </motion.div>
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            <h1
               className="hero-title"
               style={{
-                fontSize: 'var(--text-hero)', fontWeight: 900, lineHeight: 0.92,
-                letterSpacing: '-0.04em', marginBottom: 28,
-                background: 'linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%)',
-                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                fontSize: 'clamp(24px, 4vw, 42px)', fontWeight: 800, lineHeight: 1.15,
+                letterSpacing: '0.04em', marginBottom: 20,
+                color: '#fff', textTransform: 'uppercase',
               }}
             >
-              AJKEYZZZ
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35 }}
+              Welcome to AJKEYZZZ Beats Store
+            </h1>
+            <p
               className="hero-tagline"
               style={{
-                fontSize: 'var(--text-lg)', color: 'var(--text-secondary)',
-                fontWeight: 300, lineHeight: 'var(--leading-normal)', maxWidth: 500, margin: '0 auto 40px',
+                fontSize: 'var(--text-lg)', color: 'rgba(255,255,255,0.7)',
+                fontWeight: 400, lineHeight: 'var(--leading-normal)',
+                letterSpacing: '0.08em', textTransform: 'uppercase',
+                maxWidth: 600, margin: '0 auto 40px',
               }}
             >
-              Beats that move the world. Listen first, vibe always.
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}
-            >
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
+              From Lagos to Cali &mdash; Beats That Move the World
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <button
                 onClick={() => { if (trending[0]) playBeat(trending[0], beats); }}
                 className="btn-primary hero-cta-btn"
                 style={{
                   padding: '18px 44px', fontSize: 'var(--text-base)', fontWeight: 600,
                   display: 'flex', alignItems: 'center', gap: 10,
-                  boxShadow: '0 0 40px rgba(232,67,147,0.25), 0 0 80px rgba(232,67,147,0.1)',
                 }}
               >
                 <Icons.Play /> Start Listening
-              </motion.button>
-              <Link
-                to="/beats"
-                className="btn-ghost hero-cta-btn"
-                style={{
-                  padding: '18px 44px', fontSize: 'var(--text-base)',
-                  textDecoration: 'none', display: 'inline-flex', alignItems: 'center',
-                }}
-              >
-                Browse Catalog
-              </Link>
-            </motion.div>
-
-            {/* Subtle waveform hint below CTA */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.7, duration: 1 }}
-              className="hero-waveform"
-              style={{ marginTop: 48 }}
-            >
-              <HeroWaveform isPlaying={isPlaying} color={currentBeat?.cover_color || '#E84393'} />
-            </motion.div>
+              </button>
+            </div>
           </div>
         </section>
 
-        {/* Hero mobile overrides */}
+        {/* Hero animation + mobile overrides */}
         <style>{`
+          @keyframes heroPan {
+            0% { transform: scale(1) translate(0%, 0%); }
+            33% { transform: scale(1.03) translate(-0.8%, -0.5%); }
+            66% { transform: scale(1.02) translate(0.5%, 0.3%); }
+            100% { transform: scale(1.03) translate(-0.3%, -0.3%); }
+          }
           @media (max-width: 768px) {
             .hero-section {
               min-height: auto !important;
               padding-top: 32px !important;
               padding-bottom: 24px !important;
             }
-            .hero-orbs { opacity: 0.5; }
-            .hero-label { margin-bottom: 12px !important; }
             .hero-title { margin-bottom: 10px !important; }
             .hero-tagline { margin: 0 auto 20px !important; font-size: var(--text-base) !important; }
             .hero-cta-btn { padding: 14px 28px !important; font-size: var(--text-sm) !important; }
-            .hero-waveform { margin-top: 24px !important; }
           }
         `}</style>
 
@@ -570,10 +544,8 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
                     {stat.icon}
                   </div>
                   <div className="stat-number" style={{
-                    fontSize: 'var(--text-4xl)', fontWeight: 800, marginBottom: 6,
-                    background: 'linear-gradient(135deg, var(--accent), var(--accent-purple))',
-                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                    textShadow: '0 0 30px rgba(232,67,147,0.3)',
+                    fontSize: 'var(--text-4xl)', marginBottom: 6,
+                    color: 'var(--text-primary)', fontWeight: 800,
                   }}>
                     <AnimatedCounter target={stat.value} suffix={stat.suffix} />
                   </div>
@@ -697,9 +669,24 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
           </section>
         </RevealSection>
 
-        {/* ═══ QUICK ACCESS: BEST FOR GENRES ═══ */}
-        {genreSections.length > 0 && (
+        {/* ═══ COLLECTIONS ═══ */}
+        {loading && genreSections.length === 0 ? (
           <section style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px 48px' }}>
+            <SectionHeading label="Explore" title="Collections" subtitle="Browse beats by genre" />
+            {[1, 2].map(i => (
+              <div key={i} style={{ marginBottom: 48 }}>
+                <div className="skeleton" style={{ height: 24, width: 180, marginBottom: 20, borderRadius: 6 }} />
+                <div style={{ display: 'flex', gap: 16, overflow: 'hidden' }}>
+                  {[1, 2, 3, 4].map(j => (
+                    <div key={j} className="skeleton" style={{ minWidth: 260, height: 320, borderRadius: 'var(--radius)', flexShrink: 0 }} />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </section>
+        ) : genreSections.length > 0 ? (
+          <section style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px 48px' }}>
+            <SectionHeading label="Explore" title="Collections" subtitle="Browse beats by genre" />
             {genreSections.map((sec) => (
               <QuickAccessRow
                 key={sec.title}
@@ -716,58 +703,7 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
               />
             ))}
           </section>
-        )}
-
-        {/* ═══ COLLECTIONS ═══ */}
-        <RevealSection>
-          <section style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px 96px' }}>
-            <SectionHeading label="Explore" title="Collections" subtitle="Browse beats by genre" />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 20 }}>
-              {playlists.map((pl, i) => (
-                <motion.div
-                  key={pl.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.08 }}
-                >
-                  <Link
-                    to={`/beats?genre=${encodeURIComponent(pl.name)}`}
-                    style={{
-                      background: `linear-gradient(135deg, ${pl.cover_color}18, ${pl.cover_color}06)`,
-                      border: `1px solid ${pl.cover_color}22`,
-                      borderRadius: 'var(--radius-xl)', padding: '36px 32px', cursor: 'pointer',
-                      transition: 'all 0.4s var(--ease-out)', position: 'relative', overflow: 'hidden',
-                      textDecoration: 'none', color: 'inherit', display: 'block',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-4px)';
-                      e.currentTarget.style.boxShadow = `0 16px 48px ${pl.cover_color}15`;
-                      e.currentTarget.style.borderColor = pl.cover_color + '44';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = '';
-                      e.currentTarget.style.boxShadow = '';
-                      e.currentTarget.style.borderColor = pl.cover_color + '22';
-                    }}
-                  >
-                    <div style={{ fontSize: 48, marginBottom: 16 }}>{pl.cover_emoji}</div>
-                    <div style={{ fontSize: 'var(--text-xl)', fontWeight: 700, marginBottom: 4, letterSpacing: 'var(--tracking-tight)' }}>{pl.name}</div>
-                    <div style={{ color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>
-                      {beats.filter((b) => (b.playlist === pl.id || b.genre === pl.name)).length} beats
-                    </div>
-                    <div style={{
-                      position: 'absolute', top: 16, right: 16, opacity: 0.06,
-                      fontSize: 80,
-                    }}>
-                      {pl.cover_emoji}
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </section>
-        </RevealSection>
+        ) : null}
 
         {/* ═══ TESTIMONIALS ═══ */}
         <RevealSection>
@@ -801,8 +737,7 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
                 >
                   <div style={{
                     fontSize: 32, marginBottom: 20, opacity: 0.15,
-                    background: 'linear-gradient(135deg, var(--accent), var(--accent-purple))',
-                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                    color: 'var(--accent)',
                   }}>
                     &ldquo;
                   </div>
@@ -815,7 +750,7 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{
                       width: 40, height: 40, borderRadius: '50%',
-                      background: 'linear-gradient(135deg, var(--accent)22, var(--accent-purple)22)',
+                      background: 'var(--accent)15',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: 'var(--text-base)', fontWeight: 700, color: 'var(--accent)',
                     }}>
@@ -836,16 +771,10 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
         <RevealSection>
           <section style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px 120px', textAlign: 'center' }}>
             <div style={{
-              background: 'linear-gradient(135deg, rgba(232,67,147,0.06), rgba(108,92,231,0.06))',
+              background: 'var(--bg-card)',
               border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: '80px 32px',
               position: 'relative', overflow: 'hidden',
             }}>
-              {/* Subtle gradient orb */}
-              <div style={{
-                position: 'absolute', width: 400, height: 400, borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(232,67,147,0.08) 0%, transparent 70%)',
-                top: '-20%', right: '-10%', filter: 'blur(40px)',
-              }} />
               <h2 style={{
                 fontSize: 'var(--text-3xl)', fontWeight: 800, marginBottom: 16,
                 letterSpacing: 'var(--tracking-tight)', position: 'relative',
@@ -862,8 +791,7 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
                 to="/custom"
                 className="btn-primary"
                 style={{
-                  padding: '18px 44px', background: 'var(--accent-purple)', fontSize: 'var(--text-base)',
-                  boxShadow: '0 0 40px rgba(108,92,231,0.25)',
+                  padding: '18px 44px', background: 'var(--accent)', color: '#000', fontSize: 'var(--text-base)',
                   textDecoration: 'none', display: 'inline-block', position: 'relative',
                 }}
               >

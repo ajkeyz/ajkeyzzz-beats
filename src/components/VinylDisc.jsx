@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 
 export default function VinylDisc({ beat, isPlaying, size = 280 }) {
-  const color = beat.cover_color || beat.coverColor || '#E84393';
+  const color = beat.cover_color || beat.coverColor || '#FFD800';
   const labelSize = size * 0.38;
   const grooveCount = 18;
   const grooves = Array.from({ length: grooveCount }, (_, i) => {

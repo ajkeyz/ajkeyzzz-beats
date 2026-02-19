@@ -72,6 +72,7 @@ export default function BeatDetailPage({ playBeat, currentBeat, isPlaying, progr
       fetchBeatBySlug(slug),
       fetchBeats(),
     ]).then(([beatData, allBeats]) => {
+      if (!beatData) { setBeat(null); setLoading(false); return; }
       setBeat(beatData);
       if (beatData) {
         trackBeatView(beatData.id, beatData.title);
@@ -124,7 +125,7 @@ export default function BeatDetailPage({ playBeat, currentBeat, isPlaying, progr
     );
   }
 
-  const color = beat.cover_color || '#E84393';
+  const color = beat.cover_color || '#FFD800';
   const isActive = currentBeat?.id === beat.id;
 
   return (
@@ -355,6 +356,25 @@ export default function BeatDetailPage({ playBeat, currentBeat, isPlaying, progr
                   aria-label={likedBeats.has(beat.id) ? 'Unlike' : 'Like'}
                 >
                   <Icons.Heart filled={likedBeats.has(beat.id)} />
+                </button>
+                <button
+                  onClick={async () => {
+                    const url = `${window.location.origin}/beats/${beat.slug}`;
+                    if (navigator.share) {
+                      try { await navigator.share({ title: beat.title, text: `${beat.title} — AJKEYZZZ Beats`, url }); } catch {}
+                    } else {
+                      await navigator.clipboard.writeText(url);
+                      const btn = document.activeElement;
+                      if (btn) { const orig = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 1500); }
+                    }
+                  }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6, padding: '10px 20px',
+                    background: 'none', border: '1px solid var(--border)', borderRadius: 50,
+                    color: 'var(--text-secondary)', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font)',
+                  }}
+                >
+                  <Icons.Share /> Share
                 </button>
               </div>
             </motion.div>

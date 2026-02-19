@@ -9,7 +9,7 @@ export const beatSchema = z.object({
   typebeat: z.string().max(100).optional().default(''),
   tags: z.array(z.string()).optional().default([]),
   description: z.string().max(2000).optional().default(''),
-  cover_color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#E84393'),
+  cover_color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#FFD800'),
   cover_emoji: z.string().max(4).default('🎵'),
   price_basic: z.number().min(0).default(29.99),
   price_premium: z.number().min(0).default(99.99),

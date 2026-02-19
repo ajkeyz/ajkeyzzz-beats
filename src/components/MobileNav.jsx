@@ -54,7 +54,7 @@ export default function MobileNav({ hasPlayer }) {
       className="mobile-bottom-nav"
       style={{
         position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 999,
-        background: 'var(--glass-strong)', backdropFilter: 'blur(24px) saturate(180%)',
+        background: 'var(--bg-secondary)',
         borderTop: '1px solid var(--border)',
         display: 'none',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
@@ -99,7 +99,7 @@ export default function MobileNav({ hasPlayer }) {
                     position: 'absolute', top: -1, left: '20%', right: '20%',
                     height: 3, borderRadius: 1.5,
                     background: 'var(--accent)',
-                    boxShadow: '0 0 12px var(--accent), 0 0 4px var(--accent)',
+                    boxShadow: 'none',
                   }}
                   transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 />

@@ -102,8 +102,8 @@ function NotFoundPage() {
         onClick={() => navigate('/')}
         style={{
           padding: '14px 32px', borderRadius: 50, background: 'var(--accent)',
-          border: 'none', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer',
-          fontFamily: 'var(--font)', boxShadow: '0 0 30px rgba(232,67,147,0.25)',
+          border: 'none', color: '#000', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+          fontFamily: 'var(--font)', boxShadow: '0 0 30px rgba(255,216,0,0.25)',
         }}
       >
         Back to Home
@@ -134,6 +134,19 @@ export default function App() {
   const location = useLocation();
   const { isAdmin, login, logout } = useAuth();
   const player = useAudioPlayer();
+
+  // Offline detection
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  useEffect(() => {
+    const goOffline = () => setIsOffline(true);
+    const goOnline = () => setIsOffline(false);
+    window.addEventListener('offline', goOffline);
+    window.addEventListener('online', goOnline);
+    return () => {
+      window.removeEventListener('offline', goOffline);
+      window.removeEventListener('online', goOnline);
+    };
+  }, []);
 
   // Likes (persisted to localStorage)
   const [likedBeats, setLikedBeats] = useState(() => new Set(localStore.getLikes()));
@@ -283,6 +296,25 @@ export default function App() {
             #main-content.has-player { padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)) !important; }
           }
         `}</style>
+
+        {/* Offline indicator toast */}
+        <AnimatePresence>
+          {isOffline && (
+            <motion.div
+              initial={{ y: 80, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 80, opacity: 0 }}
+              style={{
+                position: 'fixed', bottom: 80, left: '50%', transform: 'translateX(-50%)',
+                background: '#D63031', color: '#fff', padding: '10px 24px', borderRadius: 50,
+                fontSize: 13, fontWeight: 600, zIndex: 9999, boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                fontFamily: 'var(--font)',
+              }}
+            >
+              You're offline
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Cookie Consent */}
         <CookieBanner />

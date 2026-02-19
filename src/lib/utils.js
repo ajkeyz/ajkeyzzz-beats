@@ -55,3 +55,8 @@ export function getAudioDuration(file) {
     audio.src = URL.createObjectURL(file);
   });
 }
+
+/** Trigger haptic feedback on supported devices */
+export function haptic(ms = 10) {
+  if (navigator.vibrate) navigator.vibrate(ms);
+}

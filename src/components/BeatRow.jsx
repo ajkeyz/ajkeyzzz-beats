@@ -5,7 +5,7 @@ import { formatTime } from '../lib/utils';
 export default memo(function BeatRow({ beat, index, playBeat, currentBeat, isPlaying, liked, toggleLike, onLicense }) {
   const isActive = currentBeat?.id === beat.id;
   const [hovered, setHovered] = useState(false);
-  const color = beat.cover_color || beat.coverColor || '#E84393';
+  const color = beat.cover_color || beat.coverColor || '#FFD800';
 
   return (
     <div

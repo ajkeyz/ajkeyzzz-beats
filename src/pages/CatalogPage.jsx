@@ -518,6 +518,65 @@ export default function CatalogPage({ playBeat, currentBeat, isPlaying, likedBea
           </div>
         </div>
 
+        {/* Active filter chips - sticky */}
+        {(genreFilter || bpmMin > 60 || bpmMax < 200 || keyFilter || moodFilter || sortBy !== 'newest') && (
+          <div style={{
+            position: 'sticky', top: 64, zIndex: 50,
+            background: 'var(--bg-primary)', borderBottom: '1px solid var(--border)',
+            padding: '8px 0', marginBottom: 16,
+            display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center',
+          }}>
+            {genreFilter && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                padding: '4px 12px', background: 'var(--accent)18', border: '1px solid var(--accent)33',
+                borderRadius: 50, fontSize: 12, fontWeight: 500, color: 'var(--text-primary)',
+              }}>
+                {genreFilter}
+                <button onClick={() => updateParam('genre', '')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 14, padding: 0, lineHeight: 1 }}>&times;</button>
+              </span>
+            )}
+            {keyFilter && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                padding: '4px 12px', background: 'var(--accent-purple)18', border: '1px solid var(--accent-purple)33',
+                borderRadius: 50, fontSize: 12, fontWeight: 500,
+              }}>
+                Key: {keyFilter}
+                <button onClick={() => updateParam('key', '')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 14, padding: 0, lineHeight: 1 }}>&times;</button>
+              </span>
+            )}
+            {moodFilter && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                padding: '4px 12px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
+                borderRadius: 50, fontSize: 12, fontWeight: 500,
+              }}>
+                {moodFilter}
+                <button onClick={() => updateParam('mood', '')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 14, padding: 0, lineHeight: 1 }}>&times;</button>
+              </span>
+            )}
+            {(bpmMin > 60 || bpmMax < 200) && (
+              <span style={{
+                padding: '4px 12px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
+                borderRadius: 50, fontSize: 12, fontWeight: 500,
+              }}>
+                BPM: {bpmMin || 60}&ndash;{bpmMax < 300 ? bpmMax : 200}
+              </span>
+            )}
+            {sortBy !== 'newest' && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                padding: '4px 12px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
+                borderRadius: 50, fontSize: 12, fontWeight: 500,
+              }}>
+                Sort: {{ popular: 'Most Popular', bpm_asc: 'BPM \u2191', bpm_desc: 'BPM \u2193', title: 'A\u2013Z', price_asc: 'Price \u2191' }[sortBy] || sortBy}
+                <button onClick={() => updateParam('sort', '')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 14, padding: 0, lineHeight: 1 }}>&times;</button>
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Beat list */}
         {loading ? (
           viewMode === 'grid' ? (

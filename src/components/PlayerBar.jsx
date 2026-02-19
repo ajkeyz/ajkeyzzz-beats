@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Icons from './Icons';
 import Waveform from './Waveform';
 import VinylDisc from './VinylDisc';
-import { formatTime } from '../lib/utils';
+import { formatTime, haptic } from '../lib/utils';
 
 // ─── KEYBOARD SHORTCUTS OVERLAY ───
 function KeyboardShortcuts({ onClose }) {
@@ -109,7 +109,7 @@ function QueueDrawer({ queue, recentlyPlayed, onClose, currentBeat, onPlayFromHi
               width: 44, height: 44, borderRadius: 'var(--radius-xs)', flexShrink: 0,
               background: currentBeat.cover_art_url
                 ? `url(${currentBeat.cover_art_url}) center/cover`
-                : `linear-gradient(135deg, ${currentBeat.cover_color || '#E84393'}33, ${currentBeat.cover_color || '#E84393'}11)`,
+                : `linear-gradient(135deg, ${currentBeat.cover_color || '#FFD800'}33, ${currentBeat.cover_color || '#FFD800'}11)`,
               display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
               overflow: 'hidden',
             }}>
@@ -145,7 +145,7 @@ function QueueDrawer({ queue, recentlyPlayed, onClose, currentBeat, onPlayFromHi
                     <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', width: 20, textAlign: 'center' }}>{i + 1}</span>
                     <div style={{
                       width: 36, height: 36, borderRadius: 6, flexShrink: 0,
-                      background: `linear-gradient(135deg, ${b.cover_color || '#E84393'}33, ${b.cover_color || '#E84393'}11)`,
+                      background: `linear-gradient(135deg, ${b.cover_color || '#FFD800'}33, ${b.cover_color || '#FFD800'}11)`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16,
                     }}>
                       {b.cover_emoji || '🎵'}
@@ -187,7 +187,7 @@ function QueueDrawer({ queue, recentlyPlayed, onClose, currentBeat, onPlayFromHi
                   >
                     <div style={{
                       width: 36, height: 36, borderRadius: 6, flexShrink: 0,
-                      background: `linear-gradient(135deg, ${b.cover_color || '#E84393'}33, ${b.cover_color || '#E84393'}11)`,
+                      background: `linear-gradient(135deg, ${b.cover_color || '#FFD800'}33, ${b.cover_color || '#FFD800'}11)`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16,
                     }}>
                       {b.cover_emoji || '🎵'}
@@ -211,7 +211,7 @@ function QueueDrawer({ queue, recentlyPlayed, onClose, currentBeat, onPlayFromHi
 
 // ─── EXPANDED PLAYER ───
 function ExpandedPlayer({ beat, isPlaying, progress, currentTime, duration, volume, setVolume, loading, onPlayPause, onNext, onPrev, onSeek, onShuffle, shuffle, repeat, onRepeat, liked, onLike, onLicense, onCollapse }) {
-  const color = beat.cover_color || '#E84393';
+  const color = beat.cover_color || '#FFD800';
 
   return (
     <motion.div
@@ -298,7 +298,7 @@ function ExpandedPlayer({ beat, isPlaying, progress, currentTime, duration, volu
           style={{
             width: 64, height: 64, borderRadius: '50%', background: color,
             border: 'none', cursor: 'pointer', display: 'flex',
-            alignItems: 'center', justifyContent: 'center', color: '#fff',
+            alignItems: 'center', justifyContent: 'center', color: '#000',
             boxShadow: `0 0 40px ${color}44`,
           }}
         >
@@ -362,6 +362,16 @@ export default function PlayerBar({
   const [showQueue, setShowQueue] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
 
+  // Swipe gestures for mobile mini player
+  const touchStartY = useRef(null);
+  const handleTouchStart = (e) => { touchStartY.current = e.touches[0].clientY; };
+  const handleTouchEnd = (e) => {
+    if (touchStartY.current === null) return;
+    const diff = touchStartY.current - e.changedTouches[0].clientY;
+    if (diff > 40) setExpanded(true); // swipe up
+    touchStartY.current = null;
+  };
+
   const handleKeyDown = useCallback((e) => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
     if (!beat) return;
@@ -394,7 +404,7 @@ export default function PlayerBar({
 
   if (!beat) return null;
 
-  const color = beat.cover_color || beat.coverColor || '#E84393';
+  const color = beat.cover_color || beat.coverColor || '#FFD800';
 
   return (
     <>
@@ -407,13 +417,13 @@ export default function PlayerBar({
             transition={{ type: 'spring', damping: 25 }}
             style={{
               position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1001,
-              background: 'var(--glass-strong)', backdropFilter: 'blur(24px) saturate(180%)',
+              background: 'var(--bg-secondary)',
               borderTop: '1px solid var(--border)',
             }}
             role="region" aria-label="Audio player"
           >
             {/* ── Mobile mini player ── */}
-            <div className="player-mobile-mini" onClick={() => setExpanded(true)} style={{ display: 'none', position: 'relative', cursor: 'pointer' }}>
+            <div className="player-mobile-mini" onClick={() => setExpanded(true)} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} style={{ display: 'none', position: 'relative', cursor: 'pointer' }}>
               <div style={{
                 position: 'absolute', top: 0, left: 0, right: 0, height: 3,
                 background: 'var(--border-subtle, rgba(255,255,255,0.06))', overflow: 'hidden',
@@ -448,11 +458,11 @@ export default function PlayerBar({
                 </div>
                 <motion.button
                   whileTap={{ scale: 0.9 }}
-                  onClick={(e) => { e.stopPropagation(); onPlayPause(); }}
+                  onClick={(e) => { e.stopPropagation(); haptic(); onPlayPause(); }}
                   style={{
                     width: 44, height: 44, borderRadius: '50%', background: color,
                     border: 'none', cursor: 'pointer', display: 'flex',
-                    alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0,
+                    alignItems: 'center', justifyContent: 'center', color: '#000', flexShrink: 0,
                     boxShadow: `0 0 20px ${color}33`,
                   }}
                   aria-label={isPlaying ? 'Pause' : 'Play'}
@@ -553,11 +563,11 @@ export default function PlayerBar({
                 </button>
                 <motion.button
                   whileTap={{ scale: 0.9 }} onClick={onPlayPause}
-                  className={isPlaying ? 'glow-active' : ''}
+
                   style={{
                     width: 44, height: 44, borderRadius: '50%', background: color,
                     border: 'none', cursor: 'pointer', display: 'flex',
-                    alignItems: 'center', justifyContent: 'center', color: '#fff',
+                    alignItems: 'center', justifyContent: 'center', color: '#000',
                     transition: 'box-shadow var(--duration-normal)',
                   }}
                   aria-label={isPlaying ? 'Pause' : 'Play'}
@@ -603,7 +613,7 @@ export default function PlayerBar({
                   {queue.length > 0 && (
                     <span style={{
                       position: 'absolute', top: -4, right: -6, width: 14, height: 14, borderRadius: '50%',
-                      background: color, fontSize: 9, fontWeight: 700, color: '#fff',
+                      background: color, fontSize: 9, fontWeight: 700, color: '#000',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
                       {queue.length}

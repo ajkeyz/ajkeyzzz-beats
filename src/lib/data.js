@@ -22,11 +22,15 @@ export async function sendNotification(payload) {
 
 export async function fetchBeats({ published = true } = {}) {
   if (isSupabaseConfigured) {
-    let query = supabase.from('beats').select('*').order('created_at', { ascending: false });
-    if (published) query = query.eq('published', true);
-    const { data, error } = await query;
-    if (error) { console.error('fetchBeats error:', error); return []; }
-    return data;
+    try {
+      let query = supabase.from('beats').select('*').order('created_at', { ascending: false });
+      if (published) query = query.eq('published', true);
+      const { data, error } = await query;
+      if (!error && data) return published ? data.filter(b => b.published !== false) : data;
+      if (error) console.warn('fetchBeats: falling back to seed data —', error.message);
+    } catch (err) {
+      console.warn('fetchBeats: network error, falling back to seed data —', err.message);
+    }
   }
   const beats = localStore.getBeats();
   if (beats.length === 0) {
@@ -38,11 +42,20 @@ export async function fetchBeats({ published = true } = {}) {
 
 export async function fetchBeatBySlug(slug) {
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase.from('beats').select('*').eq('slug', slug).single();
-    if (error) return null;
-    return data;
+    try {
+      const { data, error } = await supabase.from('beats').select('*').eq('slug', slug).single();
+      if (!error && data) return data;
+      if (error) console.warn('fetchBeatBySlug: falling back to local —', error.message);
+    } catch (err) {
+      console.warn('fetchBeatBySlug: network error —', err.message);
+    }
   }
-  const beats = localStore.getBeats();
+  // Fall back to localStorage / seed data
+  let beats = localStore.getBeats();
+  if (beats.length === 0) {
+    localStore.setBeats(SEED_BEATS);
+    beats = SEED_BEATS;
+  }
   return beats.find(b => b.slug === slug) || null;
 }
 
@@ -82,9 +95,12 @@ export async function deleteBeat(id) {
 
 export async function incrementPlays(id) {
   if (isSupabaseConfigured) {
-    await supabase.rpc('increment_plays', { beat_id: id }).catch(() => {});
-    // Also log play event
-    await supabase.from('play_events').insert({ beat_id: id }).catch(() => {});
+    try {
+      await supabase.rpc('increment_plays', { beat_id: id });
+      await supabase.from('play_events').insert({ beat_id: id });
+    } catch (err) {
+      console.warn('incrementPlays failed:', err.message);
+    }
     return;
   }
   const beats = localStore.getBeats();
@@ -275,12 +291,13 @@ function getLocalCollections() {
 
 export async function fetchCollections() {
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase.from('collections').select('*').order('sort_order', { ascending: true });
-    if (error) {
-      console.warn('fetchCollections: falling back to localStorage —', error.message);
-      return getLocalCollections();
+    try {
+      const { data, error } = await supabase.from('collections').select('*').order('sort_order', { ascending: true });
+      if (!error && data) return data;
+      if (error) console.warn('fetchCollections: falling back to localStorage —', error.message);
+    } catch (err) {
+      console.warn('fetchCollections: network error —', err.message);
     }
-    return data;
   }
   return getLocalCollections();
 }

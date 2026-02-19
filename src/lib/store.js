@@ -8,12 +8,15 @@ const MESSAGES_KEY = 'ajkeyzzz-messages';
 const COLLECTIONS_KEY = 'ajkeyzzz-collections';
 const ADMIN_KEY = 'ajkeyzzz-admin-session';
 const LIKES_KEY = 'ajkeyzzz-likes';
+const HERO_BG_KEY = 'ajkeyzzz-hero-bg';
+const LOGO_KEY = 'ajkeyzzz-logo';
 
 function get(key, fallback = []) {
   try {
     const raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : fallback;
-  } catch {
+  } catch (e) {
+    console.warn(`[store] Failed to parse "${key}":`, e.message);
     return fallback;
   }
 }
@@ -21,7 +24,11 @@ function get(key, fallback = []) {
 function set(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
-  } catch {}
+  } catch (e) {
+    if (e.name === 'QuotaExceededError') {
+      console.error(`[store] localStorage quota exceeded for "${key}". Consider clearing old data.`);
+    }
+  }
 }
 
 export const localStore = {
@@ -52,4 +59,12 @@ export const localStore = {
   // Likes
   getLikes: () => get(LIKES_KEY, []),
   setLikes: (likes) => set(LIKES_KEY, likes),
+
+  // Hero background
+  getHeroBg: () => get(HERO_BG_KEY, ''),
+  setHeroBg: (url) => set(HERO_BG_KEY, url),
+
+  // Logo
+  getLogoUrl: () => get(LOGO_KEY, ''),
+  setLogoUrl: (url) => set(LOGO_KEY, url),
 };

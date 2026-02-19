@@ -4,7 +4,7 @@ export const SEED_BEATS = [
     id: '1', title: 'hearts', slug: 'hearts', genre: 'Alté', bpm: 140,
     musical_key: 'Cm', typebeat: 'amaarae type beat', tags: ['alte', 'amaarae'], moods: ['dreamy', 'chill'],
     description: 'A dreamy Alté beat with lush pads and gentle percussion. Perfect for smooth vocals and introspective lyrics.',
-    cover_color: '#E84393', cover_emoji: '💗', cover_art_url: '',
+    cover_color: '#FFD800', cover_emoji: '💗', cover_art_url: '',
     preview_url: '', full_audio_url: '', stems_url: '',
     duration: 198, price_basic: 29.99, price_premium: 99.99,
     price_unlimited: 149.99, price_exclusive: 299.99,
@@ -91,7 +91,7 @@ export const SEED_BEATS = [
 ];
 
 export const SEED_PLAYLISTS = [
-  { id: 'alte', name: 'Alté', cover_color: '#E84393', cover_emoji: '💗' },
+  { id: 'alte', name: 'Alté', cover_color: '#FFD800', cover_emoji: '💗' },
   { id: 'afro-swing', name: 'Afro Swing', cover_color: '#0984E3', cover_emoji: '🎶' },
 ];
 
@@ -136,7 +136,7 @@ export const LICENSE_TIERS = [
     priceKey: 'price_exclusive',
     defaultPrice: 299.99,
     features: ['MP3, WAV & Stems', 'Full Ownership & Control', 'Beat Removed From Store', 'All Premium Features', 'Film, TV, Netflix & More'],
-    accent: '#E84393',
+    accent: '#FFD800',
   },
 ];
 
@@ -151,7 +151,7 @@ export const GENRE_OPTIONS = ['Alté', 'Afro Swing', 'Afrobeats', 'Amapiano', 'R
 export const MOOD_OPTIONS = [
   { name: 'chill', color: '#0984E3' },
   { name: 'dreamy', color: '#A29BFE' },
-  { name: 'vibey', color: '#E84393' },
+  { name: 'vibey', color: '#FFD800' },
   { name: 'energetic', color: '#FDCB6E' },
   { name: 'dark', color: '#636E72' },
   { name: 'hype', color: '#D63031' },

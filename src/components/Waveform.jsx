@@ -58,7 +58,7 @@ const waveformCache = new Map();
 export default function Waveform({
   audioUrl,
   progress = 0,
-  color = '#E84393',
+  color = '#FFD800',
   height = 48,
   onSeek,
   isPlaying = false,

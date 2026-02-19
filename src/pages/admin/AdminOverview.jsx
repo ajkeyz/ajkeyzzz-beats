@@ -1,6 +1,7 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { fetchBeats, fetchMessages, fetchInquiries, fetchOrders } from '../../lib/data';
+import { localStore } from '../../lib/store';
 
 // Simple bar chart component (no external library needed)
 function BarChart({ data, label, color = 'var(--accent)' }) {
@@ -41,6 +42,12 @@ export default function AdminOverview() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('all');
+  const [heroBg, setHeroBg] = useState(() => localStore.getHeroBg());
+  const [heroBgInput, setHeroBgInput] = useState(() => localStore.getHeroBg());
+  const [logoUrl, setLogoUrl] = useState(() => localStore.getLogoUrl());
+  const [logoInput, setLogoInput] = useState('');
+  const fileInputRef = useRef(null);
+  const logoFileRef = useRef(null);
 
   useEffect(() => {
     Promise.all([
@@ -96,8 +103,194 @@ export default function AdminOverview() {
       .map(b => ({ label: b.title.slice(0, 8), value: b.plays || 0 }));
   }, [beats]);
 
+  const handleHeroBgFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target.result;
+      setHeroBg(dataUrl);
+      setHeroBgInput('');
+      localStore.setHeroBg(dataUrl);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleHeroBgUrl = () => {
+    const url = heroBgInput.trim();
+    if (!url) return;
+    setHeroBg(url);
+    localStore.setHeroBg(url);
+  };
+
+  const removeHeroBg = () => {
+    setHeroBg('');
+    setHeroBgInput('');
+    localStore.setHeroBg('');
+  };
+
+  const handleLogoFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target.result;
+      setLogoUrl(dataUrl);
+      setLogoInput('');
+      localStore.setLogoUrl(dataUrl);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleLogoUrl = () => {
+    const url = logoInput.trim();
+    if (!url) return;
+    setLogoUrl(url);
+    localStore.setLogoUrl(url);
+  };
+
+  const removeLogo = () => {
+    setLogoUrl('');
+    setLogoInput('');
+    localStore.setLogoUrl('');
+  };
+
   return (
     <div>
+      {/* Hero Background */}
+      <div style={{
+        background: 'var(--bg-card)', borderRadius: 'var(--radius)', padding: 24,
+        border: '1px solid var(--border)', marginBottom: 24,
+      }}>
+        <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Hero Background Image</h4>
+        {heroBg && (
+          <div style={{ position: 'relative', marginBottom: 16, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
+            <img
+              src={heroBg}
+              alt="Hero background"
+              style={{ width: '100%', height: 160, objectFit: 'cover', display: 'block' }}
+            />
+            <button
+              onClick={removeHeroBg}
+              style={{
+                position: 'absolute', top: 8, right: 8,
+                background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none',
+                borderRadius: 'var(--radius-pill)', padding: '6px 14px', fontSize: 12,
+                fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font)',
+              }}
+            >
+              Remove
+            </button>
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          <input
+            type="text"
+            placeholder="Paste image URL..."
+            value={heroBgInput}
+            onChange={(e) => setHeroBgInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleHeroBgUrl(); }}
+            style={{
+              flex: 1, minWidth: 200, padding: '10px 14px', borderRadius: 'var(--radius-sm)',
+              background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
+              color: 'var(--text-primary)', fontSize: 13, fontFamily: 'var(--font)', outline: 'none',
+            }}
+          />
+          <button
+            onClick={handleHeroBgUrl}
+            style={{
+              padding: '10px 20px', borderRadius: 'var(--radius-sm)', background: 'var(--accent)',
+              border: 'none', color: '#000', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              fontFamily: 'var(--font)',
+            }}
+          >
+            Set URL
+          </button>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              padding: '10px 20px', borderRadius: 'var(--radius-sm)',
+              background: 'transparent', border: '1px solid var(--border)',
+              color: 'var(--text-secondary)', fontSize: 13, fontWeight: 500, cursor: 'pointer',
+              fontFamily: 'var(--font)',
+            }}
+          >
+            Upload File
+          </button>
+          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleHeroBgFile} style={{ display: 'none' }} />
+        </div>
+        <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
+          Recommended: 1920x800px or wider. JPG/PNG. This image appears behind the hero text on the homepage.
+        </p>
+      </div>
+
+      {/* Logo Image */}
+      <div style={{
+        background: 'var(--bg-card)', borderRadius: 'var(--radius)', padding: 24,
+        border: '1px solid var(--border)', marginBottom: 24,
+      }}>
+        <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Navbar Logo Image</h4>
+        {logoUrl && (
+          <div style={{ position: 'relative', marginBottom: 16, display: 'inline-block' }}>
+            <img
+              src={logoUrl}
+              alt="Logo"
+              style={{ height: 40, maxWidth: 200, objectFit: 'contain', display: 'block', borderRadius: 'var(--radius-sm)' }}
+            />
+            <button
+              onClick={removeLogo}
+              style={{
+                position: 'absolute', top: -6, right: -6,
+                background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none',
+                borderRadius: '50%', width: 22, height: 22, fontSize: 11,
+                fontWeight: 700, cursor: 'pointer', lineHeight: '22px', textAlign: 'center',
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          <input
+            type="text"
+            placeholder="Paste logo URL..."
+            value={logoInput}
+            onChange={(e) => setLogoInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleLogoUrl(); }}
+            style={{
+              flex: 1, minWidth: 200, padding: '10px 14px', borderRadius: 'var(--radius-sm)',
+              background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
+              color: 'var(--text-primary)', fontSize: 13, fontFamily: 'var(--font)', outline: 'none',
+            }}
+          />
+          <button
+            onClick={handleLogoUrl}
+            style={{
+              padding: '10px 20px', borderRadius: 'var(--radius-sm)', background: 'var(--accent)',
+              border: 'none', color: '#000', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              fontFamily: 'var(--font)',
+            }}
+          >
+            Set URL
+          </button>
+          <button
+            onClick={() => logoFileRef.current?.click()}
+            style={{
+              padding: '10px 20px', borderRadius: 'var(--radius-sm)',
+              background: 'transparent', border: '1px solid var(--border)',
+              color: 'var(--text-secondary)', fontSize: 13, fontWeight: 500, cursor: 'pointer',
+              fontFamily: 'var(--font)',
+            }}
+          >
+            Upload File
+          </button>
+          <input ref={logoFileRef} type="file" accept="image/*" onChange={handleLogoFile} style={{ display: 'none' }} />
+        </div>
+        <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
+          Recommended: PNG with transparent background, ~200x40px. Replaces the text logo in the navbar.
+        </p>
+      </div>
+
       {/* Date Range Filter */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
         {[
@@ -189,7 +382,7 @@ export default function AdminOverview() {
               </span>
               <div style={{
                 width: 36, height: 36, borderRadius: 8,
-                background: `linear-gradient(135deg, ${beat.cover_color || '#E84393'}33, ${beat.cover_color || '#E84393'}11)`,
+                background: `linear-gradient(135deg, ${beat.cover_color || '#FFD800'}33, ${beat.cover_color || '#FFD800'}11)`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
               }}>
                 {beat.cover_emoji || '🎵'}

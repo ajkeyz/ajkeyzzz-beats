@@ -4,11 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Icons from './Icons';
 import VerifiedBadge from './VerifiedBadge';
 import useTheme from '../hooks/useTheme';
+import { localStore } from '../lib/store';
 
 export default function Navbar({ isAdmin, onLogout }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
+  const [logoUrl] = useState(() => localStore.getLogoUrl());
 
   const links = [
     { to: '/', label: 'Home' },
@@ -27,8 +29,8 @@ export default function Navbar({ isAdmin, onLogout }) {
   return (
     <nav style={{
       position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
-      background: 'var(--glass)', backdropFilter: 'blur(20px) saturate(180%)',
-      borderBottom: '1px solid var(--border)',
+      background: 'var(--bg-secondary)',
+      boxShadow: '0 1px 0 var(--border)',
     }} role="navigation" aria-label="Main navigation">
       <div style={{
         maxWidth: 1280, margin: '0 auto', padding: '0 24px',
@@ -39,10 +41,15 @@ export default function Navbar({ isAdmin, onLogout }) {
           style={{
             fontFamily: 'var(--mono)', fontWeight: 700, fontSize: 18,
             letterSpacing: 2, color: 'var(--accent)', textDecoration: 'none',
+            display: 'flex', alignItems: 'center', gap: 6,
           }}
           onClick={() => setMobileMenuOpen(false)}
         >
-          AJKEYZZZ <VerifiedBadge size={14} />
+          {logoUrl ? (
+            <img src={logoUrl} alt="AJKEYZZZ" style={{ height: 48, objectFit: 'contain' }} />
+          ) : (
+            <>AJKEYZZZ <VerifiedBadge size={14} /></>
+          )}
         </Link>
 
         {/* Desktop Nav */}
