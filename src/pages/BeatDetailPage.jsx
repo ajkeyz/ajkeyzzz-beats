@@ -76,18 +76,41 @@ export default function BeatDetailPage({ playBeat, currentBeat, isPlaying, progr
       setBeat(beatData);
       if (beatData) {
         trackBeatView(beatData.id, beatData.title);
-        // Score-based similar beats
+        // Enhanced score-based similar beats with BPM proximity weighting and key compatibility
+        const COMPATIBLE_KEYS = {
+          'C': ['Am', 'G', 'F'], 'Cm': ['Eb', 'Gm', 'Fm'],
+          'D': ['Bm', 'A', 'G'], 'Dm': ['F', 'Am', 'Gm'],
+          'E': ['C#m', 'B', 'A'], 'Em': ['G', 'Bm', 'Am'],
+          'F': ['Dm', 'C', 'Bb'], 'Fm': ['Ab', 'Cm', 'Bbm'],
+          'G': ['Em', 'D', 'C'], 'Gm': ['Bb', 'Dm', 'Cm'],
+          'A': ['F#m', 'E', 'D'], 'Am': ['C', 'Em', 'Dm'],
+          'B': ['G#m', 'F#', 'E'], 'Bm': ['D', 'F#m', 'Em'],
+        };
         const similar = allBeats
           .filter(b => b.id !== beatData.id)
           .map(b => {
             let score = 0;
-            if (b.genre === beatData.genre) score += 3;
-            if (Math.abs(b.bpm - beatData.bpm) <= 15) score += 2;
-            if (b.musical_key === beatData.musical_key) score += 2;
+            // Genre match (strongest signal)
+            if (b.genre === beatData.genre) score += 4;
+            // BPM proximity (graduated scoring)
+            const bpmDiff = Math.abs(b.bpm - beatData.bpm);
+            if (bpmDiff <= 5) score += 3;
+            else if (bpmDiff <= 15) score += 2;
+            else if (bpmDiff <= 25) score += 1;
+            // Key compatibility
+            if (b.musical_key === beatData.musical_key) {
+              score += 3;
+            } else if (beatData.musical_key && (COMPATIBLE_KEYS[beatData.musical_key] || []).includes(b.musical_key)) {
+              score += 2;
+            }
+            // Shared moods
             const sharedMoods = (b.moods || []).filter(m => (beatData.moods || []).includes(m)).length;
-            score += sharedMoods;
+            score += sharedMoods * 1.5;
+            // Shared tags
             const sharedTags = (b.tags || []).filter(t => (beatData.tags || []).includes(t)).length;
             score += sharedTags;
+            // Bonus for popular beats (social proof)
+            if ((b.plays || 0) > 100) score += 0.5;
             return { ...b, _score: score };
           })
           .filter(b => b._score > 0)

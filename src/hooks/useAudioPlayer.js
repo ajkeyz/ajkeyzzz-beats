@@ -18,6 +18,7 @@ export default function useAudioPlayer() {
   const [shuffle, setShuffle] = useState(false);
   const [repeat, setRepeat] = useState('off'); // off, all, one
   const [recentlyPlayed, setRecentlyPlayed] = useState([]);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
 
   const audioRef = useRef(new Audio());
   const hasCountedPlay = useRef(false);
@@ -106,6 +107,7 @@ export default function useAudioPlayer() {
   }, []);
 
   useEffect(() => { audioRef.current.volume = volume; }, [volume]);
+  useEffect(() => { audioRef.current.playbackRate = playbackSpeed; }, [playbackSpeed]);
 
   const startCrossfade = useCallback(() => {
     const audio = audioRef.current;
@@ -277,6 +279,14 @@ export default function useAudioPlayer() {
     loadAndPlay(beat, shouldCrossfade);
   }, [currentBeat, loadAndPlay, stopSimulation]);
 
+  const cycleSpeed = useCallback(() => {
+    setPlaybackSpeed(prev => {
+      const speeds = [0.75, 1, 1.25, 1.5];
+      const idx = speeds.indexOf(prev);
+      return speeds[(idx + 1) % speeds.length];
+    });
+  }, []);
+
   useEffect(() => {
     return () => { clearInterval(fadeOutRef.current); clearInterval(fadeInRef.current); clearInterval(simulationRef.current); };
   }, []);
@@ -285,8 +295,8 @@ export default function useAudioPlayer() {
     currentBeat, isPlaying, progress, currentTime,
     duration: duration || currentBeat?.duration || 0,
     volume, setVolume, loading, error, queue,
-    shuffle, repeat, recentlyPlayed,
+    shuffle, repeat, recentlyPlayed, playbackSpeed,
     playBeat, togglePlay, seek, skipNext, skipPrev,
-    toggleShuffle, toggleRepeat, playFromHistory,
+    toggleShuffle, toggleRepeat, playFromHistory, cycleSpeed,
   };
 }

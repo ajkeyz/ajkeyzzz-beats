@@ -326,11 +326,17 @@ input[type="range"]:active::-webkit-slider-thumb {
 }
 
 /* Smooth color transitions for theme toggle */
-nav, .nav-link, .card-hover, button, a, input, select, textarea {
+:root, [data-theme="light"], [data-theme="dark"] {
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+nav, .nav-link, .card-hover, button, a, input, select, textarea,
+footer, section, div, main, header, aside {
   transition-property: background-color, border-color, color, box-shadow;
   transition-duration: var(--duration-slow);
   transition-timing-function: var(--ease-out);
 }
+/* Opt out animations/canvas from theme transitions */
+canvas, video, svg, img { transition: none !important; }
 
 /* Cookie banner */
 .cookie-banner {
@@ -378,6 +384,57 @@ nav, .nav-link, .card-hover, button, a, input, select, textarea {
     transform: scale(0.97) !important;
   }
 }
+
+/* ─── ROUTE TRANSITION PROGRESS BAR ─── */
+@keyframes routeProgress {
+  0% { width: 0%; }
+  50% { width: 70%; }
+  100% { width: 100%; }
+}
+.route-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-purple));
+  z-index: 9999;
+  animation: routeProgress 0.6s ease-out forwards;
+  box-shadow: 0 0 10px var(--accent);
+}
+
+/* ─── BPM PULSE ANIMATION ─── */
+@keyframes bpmPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ─── ACCORDION ─── */
+.accordion-content {
+  overflow: hidden;
+  transition: max-height 0.35s ease, opacity 0.25s ease;
+}
+
+/* ─── TYPOGRAPHY REFINEMENTS ─── */
+h1, h2, h3 {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+h1 { letter-spacing: var(--tracking-tight); }
+h2 { letter-spacing: -0.02em; }
+
+/* Section heading label style */
+.section-label {
+  font-size: var(--text-xs);
+  font-family: var(--mono);
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  font-weight: 600;
+  margin-bottom: var(--sp-2);
+}
+
+/* Consistent link hover */
+a:hover { transition: color var(--duration-fast); }
 
 /* ─── REDUCED MOTION ─── */
 @media (prefers-reduced-motion: reduce) {

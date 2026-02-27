@@ -132,9 +132,15 @@ function QueueDrawer({ queue, recentlyPlayed, onClose, currentBeat, onPlayFromHi
               Up Next ({queue.length})
             </div>
             {queue.length === 0 ? (
-              <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', textAlign: 'center', padding: '40px 0' }}>
-                No tracks in queue
-              </p>
+              <div style={{ textAlign: 'center', padding: '48px 20px' }}>
+                <div style={{ fontSize: 36, marginBottom: 12, opacity: 0.5 }}>🎵</div>
+                <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', marginBottom: 4 }}>
+                  No tracks in queue
+                </p>
+                <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', opacity: 0.7 }}>
+                  Play a beat from the catalog to build your queue
+                </p>
+              </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {queue.map((b, i) => (
@@ -169,9 +175,15 @@ function QueueDrawer({ queue, recentlyPlayed, onClose, currentBeat, onPlayFromHi
               Recently Played ({recentlyPlayed.length})
             </div>
             {recentlyPlayed.length === 0 ? (
-              <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', textAlign: 'center', padding: '40px 0' }}>
-                No history yet
-              </p>
+              <div style={{ textAlign: 'center', padding: '48px 20px' }}>
+                <div style={{ fontSize: 36, marginBottom: 12, opacity: 0.5 }}>🕐</div>
+                <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', marginBottom: 4 }}>
+                  No history yet
+                </p>
+                <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', opacity: 0.7 }}>
+                  Beats you listen to will appear here
+                </p>
+              </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {recentlyPlayed.map((b, i) => (
@@ -356,6 +368,7 @@ export default function PlayerBar({
   onPlayPause, onNext, onPrev, onSeek,
   liked, onLike, onLicense,
   shuffle, onShuffle, repeat, onRepeat, recentlyPlayed = [], onPlayFromHistory,
+  playbackSpeed = 1, onCycleSpeed,
 }) {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
@@ -604,6 +617,23 @@ export default function PlayerBar({
                     style={{ width: 80, accentColor: color }} aria-label="Volume"
                   />
                 </div>
+
+                {onCycleSpeed && (
+                  <button className="player-extra-btn" onClick={onCycleSpeed}
+                    style={{
+                      background: playbackSpeed !== 1 ? 'var(--accent)18' : 'none',
+                      border: playbackSpeed !== 1 ? '1px solid var(--accent)33' : 'none',
+                      borderRadius: 'var(--radius-sm)', cursor: 'pointer',
+                      color: playbackSpeed !== 1 ? 'var(--accent)' : 'var(--text-muted)',
+                      fontSize: 'var(--text-xs)', fontWeight: 700, fontFamily: 'var(--mono)',
+                      padding: '3px 8px', display: 'flex', alignItems: 'center',
+                    }}
+                    aria-label={`Playback speed: ${playbackSpeed}x`}
+                    title="Playback speed"
+                  >
+                    {playbackSpeed}x
+                  </button>
+                )}
 
                 <button className="player-extra-btn" onClick={() => setShowQueue(true)}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', position: 'relative' }}

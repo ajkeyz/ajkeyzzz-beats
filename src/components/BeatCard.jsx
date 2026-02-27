@@ -53,7 +53,9 @@ export default memo(function BeatCard({ beat, index, playBeat, currentBeat, isPl
         background: 'var(--bg-card)', borderRadius: 'var(--radius)', overflow: 'hidden',
         border: comparing ? '2px solid var(--accent)' : isActive ? `1px solid ${color}44` : '1px solid var(--border)',
         cursor: 'pointer', position: 'relative',
-        transition: 'border-color var(--duration-normal) var(--ease-out)',
+        transition: 'border-color var(--duration-normal) var(--ease-out), transform var(--duration-normal) var(--ease-out), box-shadow var(--duration-normal) var(--ease-out)',
+        transform: hovered ? 'translateY(-2px)' : 'translateY(0)',
+        boxShadow: hovered ? 'var(--shadow-lg)' : 'none',
       }}
       onTouchStart={() => {
         longPressTimer.current = setTimeout(() => setShowActions(true), 500);
@@ -249,9 +251,17 @@ export default memo(function BeatCard({ beat, index, playBeat, currentBeat, isPl
           </div>
 
           <div className="beat-card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
-              &#9654; {(beat.plays || 0).toLocaleString()}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+                &#9654; {(beat.plays || 0).toLocaleString()}
+              </span>
+              <span className="beat-card-price" style={{
+                fontSize: 'var(--text-xs)', fontWeight: 700, color: 'var(--accent)',
+                fontFamily: 'var(--mono)',
+              }}>
+                From ${(beat.price_basic || 29.99).toFixed(0)}
+              </span>
+            </div>
             <button
               className="beat-card-license"
               onClick={(e) => { e.stopPropagation(); onLicense?.(); }}
