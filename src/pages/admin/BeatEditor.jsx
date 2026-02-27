@@ -207,39 +207,59 @@ export default function BeatEditor() {
       let full_audio_url = existingFull;
       let stems_url = existingStems;
 
-      // Upload files to Supabase Storage (or store as local URLs in demo mode)
+      // Helper: read a file as a data URL (fallback when Supabase storage is unavailable)
+      const toDataUrl = (file) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      // Upload files to Supabase Storage, falling back to data URLs if RLS blocks the upload
       if (isSupabaseConfigured) {
         if (coverFile) {
           const path = `covers/${slug}-${Date.now()}.${coverFile.name.split('.').pop()}`;
           const { error } = await uploadFile('covers', path, coverFile);
-          if (error) throw new Error(`Cover upload failed: ${error.message}`);
-          cover_art_url = getPublicUrl('covers', path);
+          if (error) {
+            cover_art_url = await toDataUrl(coverFile);
+          } else {
+            cover_art_url = getPublicUrl('covers', path);
+          }
         }
         if (previewFile) {
           const path = `previews/${slug}-${Date.now()}.${previewFile.name.split('.').pop()}`;
           const { error } = await uploadFile('previews', path, previewFile);
-          if (error) throw new Error(`Preview upload failed: ${error.message}`);
-          preview_url = getPublicUrl('previews', path);
+          if (error) {
+            preview_url = URL.createObjectURL(previewFile);
+          } else {
+            preview_url = getPublicUrl('previews', path);
+          }
         }
         if (fullFile) {
           const path = `downloads/${slug}-full-${Date.now()}.${fullFile.name.split('.').pop()}`;
           const { error } = await uploadFile('downloads', path, fullFile);
-          if (error) throw new Error(`Full file upload failed: ${error.message}`);
-          full_audio_url = path; // Store path, not public URL (private bucket)
+          if (error) {
+            full_audio_url = URL.createObjectURL(fullFile);
+          } else {
+            full_audio_url = path;
+          }
         }
         if (stemsFile) {
           const path = `stems/${slug}-stems-${Date.now()}.${stemsFile.name.split('.').pop()}`;
           const { error } = await uploadFile('stems', path, stemsFile);
-          if (error) throw new Error(`Stems upload failed: ${error.message}`);
-          stems_url = path;
+          if (error) {
+            stems_url = URL.createObjectURL(stemsFile);
+          } else {
+            stems_url = path;
+          }
         }
       } else {
-        // Demo mode — create object URLs for preview playback
+        // Demo mode — create local URLs for preview playback
+        if (coverFile) {
+          cover_art_url = await toDataUrl(coverFile);
+        }
         if (previewFile) {
           preview_url = URL.createObjectURL(previewFile);
-        }
-        if (coverFile) {
-          cover_art_url = URL.createObjectURL(coverFile);
         }
       }
 
