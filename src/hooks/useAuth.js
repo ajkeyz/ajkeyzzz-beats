@@ -55,36 +55,32 @@ export default function useAuth() {
 
     if (isSupabaseConfigured) {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        loginAttempts.current++;
-        if (loginAttempts.current >= MAX_LOGIN_ATTEMPTS) {
-          lockoutUntil.current = Date.now() + LOCKOUT_DURATION_MS;
-          loginAttempts.current = 0;
-        }
-        return { error: error.message };
-      }
-      loginAttempts.current = 0;
-      setUser(data.user);
-      setIsAdmin(data.user.user_metadata?.role === 'admin');
-      return { error: null };
-    } else {
-      // Local fallback — password from env var
-      const adminPass = import.meta.env.VITE_ADMIN_PASSWORD || '';
-      if (adminPass && password === adminPass) {
+      if (!error) {
         loginAttempts.current = 0;
-        setIsAdmin(true);
-        setUser({ email: 'admin@local' });
-        localStore.setAdmin(true);
+        setUser(data.user);
+        setIsAdmin(data.user.user_metadata?.role === 'admin');
         return { error: null };
       }
-      loginAttempts.current++;
-      if (loginAttempts.current >= MAX_LOGIN_ATTEMPTS) {
-        lockoutUntil.current = Date.now() + LOCKOUT_DURATION_MS;
-        loginAttempts.current = 0;
-        return { error: 'Too many attempts. Try again in 60s.' };
-      }
-      return { error: 'Incorrect password' };
+      // Supabase failed — fall through to try local password
     }
+
+    // Local fallback — password from env var
+    const adminPass = import.meta.env.VITE_ADMIN_PASSWORD || '';
+    if (adminPass && password === adminPass) {
+      loginAttempts.current = 0;
+      setIsAdmin(true);
+      setUser({ email: email || 'admin@local' });
+      localStore.setAdmin(true);
+      return { error: null };
+    }
+
+    loginAttempts.current++;
+    if (loginAttempts.current >= MAX_LOGIN_ATTEMPTS) {
+      lockoutUntil.current = Date.now() + LOCKOUT_DURATION_MS;
+      loginAttempts.current = 0;
+      return { error: 'Too many attempts. Try again in 60s.' };
+    }
+    return { error: 'Incorrect password' };
   }, []);
 
   const logout = useCallback(async () => {
