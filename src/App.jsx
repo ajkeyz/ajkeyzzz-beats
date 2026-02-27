@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, lazy, Suspense } from 'react';
+import { useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './components/Navbar';
@@ -7,9 +7,12 @@ import LicensingModal from './components/LicensingModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import CookieBanner from './components/CookieBanner';
 import MobileNav from './components/MobileNav';
+import CartDrawer from './components/CartDrawer';
+import ActivityFeed from './components/ActivityFeed';
 import useAudioPlayer from './hooks/useAudioPlayer';
 import useAuth from './hooks/useAuth';
 import { localStore } from './lib/store';
+import { cart } from './lib/cart';
 
 // Pages — eager load critical routes
 import HomePage from './pages/HomePage';
@@ -36,10 +39,17 @@ function PageLoader() {
   return (
     <div style={{ paddingTop: 100, textAlign: 'center', padding: '200px 24px' }}>
       <div style={{
-        width: 32, height: 32, border: '3px solid var(--border)',
+        width: 40, height: 40, border: '3px solid var(--border)',
         borderTopColor: 'var(--accent)', borderRadius: '50%',
-        animation: 'spin 0.8s linear infinite', margin: '0 auto',
+        animation: 'spin 0.8s linear infinite', margin: '0 auto 16px',
       }} />
+      <div style={{
+        fontSize: 'var(--text-xs)', color: 'var(--text-muted)',
+        fontFamily: 'var(--mono)', letterSpacing: 'var(--tracking-wider)',
+        textTransform: 'uppercase', animation: 'pulse 1.5s ease-in-out infinite',
+      }}>
+        Loading
+      </div>
     </div>
   );
 }
@@ -135,6 +145,28 @@ export default function App() {
   const { isAdmin, login, logout } = useAuth();
   const player = useAudioPlayer();
 
+  // Cart drawer
+  const [cartOpen, setCartOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(() => cart.getItems().length);
+  useEffect(() => {
+    const onStorage = () => setCartCount(cart.getItems().length);
+    window.addEventListener('storage', onStorage);
+    const interval = setInterval(onStorage, 1000);
+    return () => { window.removeEventListener('storage', onStorage); clearInterval(interval); };
+  }, []);
+
+  // Route progress bar
+  const [showProgress, setShowProgress] = useState(false);
+  const prevPath = useRef(location.pathname);
+  useEffect(() => {
+    if (location.pathname !== prevPath.current) {
+      setShowProgress(true);
+      prevPath.current = location.pathname;
+      const timer = setTimeout(() => setShowProgress(false), 700);
+      return () => clearTimeout(timer);
+    }
+  }, [location.pathname]);
+
   // Offline detection
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   useEffect(() => {
@@ -192,7 +224,10 @@ export default function App() {
         Skip to main content
       </a>
       <div id="main-content" className={player.currentBeat ? 'has-player' : ''} style={{ minHeight: '100vh', background: 'var(--bg-primary)', paddingBottom: player.currentBeat ? 100 : 0 }}>
-        <Navbar isAdmin={isAdmin} onLogout={logout} />
+        <Navbar isAdmin={isAdmin} onLogout={logout} cartCount={cartCount} onCartOpen={() => setCartOpen(true)} />
+
+        {/* Route progress bar */}
+        {showProgress && <div className="route-progress-bar" />}
 
         <Suspense fallback={<PageLoader />}>
           <AnimatePresence mode="wait">
@@ -268,6 +303,8 @@ export default function App() {
           onShuffle={player.toggleShuffle}
           repeat={player.repeat}
           onRepeat={player.toggleRepeat}
+          playbackSpeed={player.playbackSpeed}
+          onCycleSpeed={player.cycleSpeed}
           recentlyPlayed={player.recentlyPlayed}
           onPlayFromHistory={player.playFromHistory}
           onPlayPause={player.togglePlay}
@@ -315,6 +352,12 @@ export default function App() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Cart Drawer */}
+        <CartDrawer isOpen={cartOpen} onClose={() => { setCartOpen(false); setCartCount(cart.getItems().length); }} />
+
+        {/* Activity Feed (social proof) */}
+        <ActivityFeed />
 
         {/* Cookie Consent */}
         <CookieBanner />

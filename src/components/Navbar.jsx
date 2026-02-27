@@ -6,7 +6,7 @@ import VerifiedBadge from './VerifiedBadge';
 import useTheme from '../hooks/useTheme';
 import { localStore } from '../lib/store';
 
-export default function Navbar({ isAdmin, onLogout }) {
+export default function Navbar({ isAdmin, onLogout, cartCount = 0, onCartOpen }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
@@ -80,6 +80,29 @@ export default function Navbar({ isAdmin, onLogout }) {
               )}
             </Link>
           ))}
+
+          {/* Cart */}
+          <button
+            onClick={onCartOpen}
+            style={{
+              background: 'none', border: 'none', color: 'var(--text-muted)',
+              cursor: 'pointer', display: 'flex', padding: 4, position: 'relative',
+            }}
+            title="Cart"
+            aria-label="Open cart"
+          >
+            <Icons.Cart />
+            {cartCount > 0 && (
+              <span style={{
+                position: 'absolute', top: -4, right: -6, width: 16, height: 16,
+                borderRadius: '50%', background: 'var(--accent)', fontSize: 9,
+                fontWeight: 700, color: '#000', display: 'flex', alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                {cartCount}
+              </span>
+            )}
+          </button>
 
           {/* Theme toggle */}
           <button

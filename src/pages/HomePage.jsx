@@ -391,9 +391,9 @@ const QuickAccessRow = memo(function QuickAccessRow({ title, subtitle, beats, pl
 
 // ─── TESTIMONIALS ───
 const TESTIMONIALS = [
-  { name: 'DJ Flame', text: 'AJKEYZZZ never misses. Every beat is a hit waiting to happen.', role: 'Artist' },
-  { name: 'Kelvin O.', text: 'The quality is insane. My mix just hit 100K with one of these beats.', role: 'Producer' },
-  { name: 'Adaeze M.', text: 'Best Alté beats on the internet. Period. The vibes are always right.', role: 'Singer' },
+  { name: 'DJ Flame', text: 'AJKEYZZZ never misses. Every beat is a hit waiting to happen.', role: 'Artist', rating: 5, color: '#FF6B6B' },
+  { name: 'Kelvin O.', text: 'The quality is insane. My mix just hit 100K with one of these beats.', role: 'Producer', rating: 5, color: '#6C5CE7' },
+  { name: 'Adaeze M.', text: 'Best Alté beats on the internet. Period. The vibes are always right.', role: 'Singer', rating: 5, color: '#00B894' },
 ];
 
 // ─── MAIN COMPONENT ───
@@ -466,7 +466,7 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
               className="hero-title"
               style={{
                 fontSize: 'clamp(24px, 4vw, 42px)', fontWeight: 800, lineHeight: 1.15,
-                letterSpacing: '0.04em', marginBottom: 20,
+                letterSpacing: '0.06em', marginBottom: 20,
                 color: '#fff', textTransform: 'uppercase',
               }}
             >
@@ -483,7 +483,8 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
             >
               From Lagos to Cali &mdash; Beats That Move the World
             </p>
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <HeroWaveform isPlaying={isPlaying} color="#FFD800" />
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 32 }}>
               <button
                 onClick={() => { if (trending[0]) playBeat(trending[0], beats); }}
                 className="btn-primary hero-cta-btn"
@@ -735,24 +736,23 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
                     e.currentTarget.style.transform = '';
                   }}
                 >
-                  <div style={{
-                    fontSize: 32, marginBottom: 20, opacity: 0.15,
-                    color: 'var(--accent)',
-                  }}>
-                    &ldquo;
+                  <div style={{ display: 'flex', gap: 2, marginBottom: 16 }}>
+                    {Array.from({ length: 5 }).map((_, s) => (
+                      <Icons.Star key={s} filled={s < (t.rating || 5)} />
+                    ))}
                   </div>
                   <p style={{
                     fontSize: 'var(--text-sm)', color: 'var(--text-secondary)',
                     lineHeight: 'var(--leading-normal)', marginBottom: 24,
                   }}>
-                    {t.text}
+                    &ldquo;{t.text}&rdquo;
                   </p>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{
                       width: 40, height: 40, borderRadius: '50%',
-                      background: 'var(--accent)15',
+                      background: `${t.color || 'var(--accent)'}22`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 'var(--text-base)', fontWeight: 700, color: 'var(--accent)',
+                      fontSize: 'var(--text-base)', fontWeight: 700, color: t.color || 'var(--accent)',
                     }}>
                       {t.name[0]}
                     </div>

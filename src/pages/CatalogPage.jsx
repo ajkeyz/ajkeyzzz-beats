@@ -64,6 +64,119 @@ function BpmRangeSlider({ min, max, onChange }) {
   );
 }
 
+// ─── SEARCH AUTOCOMPLETE ───
+function SearchAutocomplete({ value, onChange, beats }) {
+  const [focused, setFocused] = useState(false);
+  const [localVal, setLocalVal] = useState(value);
+  const wrapperRef = useRef(null);
+
+  useEffect(() => { setLocalVal(value); }, [value]);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) setFocused(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const suggestions = useMemo(() => {
+    if (!localVal || localVal.length < 2) return [];
+    const q = localVal.toLowerCase();
+    const results = [];
+    const seen = new Set();
+    // Match beats by title
+    beats.forEach(b => {
+      if (b.title.toLowerCase().includes(q) && !seen.has('beat:' + b.id)) {
+        seen.add('beat:' + b.id);
+        results.push({ type: 'beat', label: b.title, sub: `${b.genre} · ${b.bpm} BPM`, value: b.title });
+      }
+    });
+    // Match genres
+    GENRE_OPTIONS.forEach(g => {
+      if (g.toLowerCase().includes(q) && !seen.has('genre:' + g)) {
+        seen.add('genre:' + g);
+        results.push({ type: 'genre', label: g, sub: 'Genre', value: g });
+      }
+    });
+    // Match moods
+    MOOD_OPTIONS.forEach(m => {
+      if (m.name.toLowerCase().includes(q) && !seen.has('mood:' + m.name)) {
+        seen.add('mood:' + m.name);
+        results.push({ type: 'mood', label: m.name, sub: 'Mood', value: m.name });
+      }
+    });
+    return results.slice(0, 6);
+  }, [localVal, beats]);
+
+  const showDropdown = focused && suggestions.length > 0;
+
+  return (
+    <div ref={wrapperRef} style={{ position: 'relative', maxWidth: 480, marginBottom: 20 }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 10, background: 'var(--bg-card)',
+        borderRadius: showDropdown ? 'var(--radius) var(--radius) 0 0' : 'var(--radius-pill)',
+        padding: '12px 24px',
+        border: focused ? '1px solid var(--accent)44' : '1px solid var(--border)',
+        transition: 'border-color var(--duration-normal), border-radius var(--duration-normal)',
+      }}>
+        <Icons.Search />
+        <input
+          type="text" placeholder="Search beats, genres, moods, keys..."
+          value={localVal}
+          onChange={(e) => { setLocalVal(e.target.value); onChange(e.target.value); }}
+          onFocus={() => setFocused(true)}
+          style={{
+            background: 'none', border: 'none', outline: 'none', color: 'var(--text-primary)',
+            fontSize: 'var(--text-sm)', width: '100%', fontFamily: 'var(--font)',
+          }}
+          aria-label="Search beats"
+          autoComplete="off"
+        />
+        {localVal && (
+          <button
+            onClick={() => { setLocalVal(''); onChange(''); }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}
+            aria-label="Clear search"
+          >
+            <Icons.Close />
+          </button>
+        )}
+      </div>
+      {showDropdown && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+          background: 'var(--bg-card)', border: '1px solid var(--accent)44', borderTop: 'none',
+          borderRadius: '0 0 var(--radius) var(--radius)',
+          boxShadow: 'var(--shadow-lg)', overflow: 'hidden',
+        }}>
+          {suggestions.map((s, i) => (
+            <button
+              key={i}
+              onClick={() => { setLocalVal(s.value); onChange(s.value); setFocused(false); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 12, width: '100%',
+                padding: '10px 24px', background: 'none', border: 'none', borderTop: i > 0 ? '1px solid var(--border-subtle)' : 'none',
+                cursor: 'pointer', textAlign: 'left', fontFamily: 'var(--font)',
+                transition: 'background var(--duration-fast)',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+            >
+              <span style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--text-primary)' }}>
+                {s.label}
+              </span>
+              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginLeft: 'auto' }}>
+                {s.sub}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── FILTER PANEL ───
 function FilterPanel({
   searchParams, updateParam, clearFilters,
@@ -76,25 +189,12 @@ function FilterPanel({
 
   return (
     <div style={{ marginBottom: 32 }}>
-      {/* Search */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 10, background: 'var(--bg-card)',
-        borderRadius: 'var(--radius-pill)', padding: '12px 24px', marginBottom: 20,
-        border: '1px solid var(--border)', maxWidth: 480,
-        transition: 'border-color var(--duration-normal)',
-      }}>
-        <Icons.Search />
-        <input
-          type="text" placeholder="Search beats, genres, moods, keys..."
-          value={searchParams.get('q') || ''}
-          onChange={(e) => updateParam('q', e.target.value)}
-          style={{
-            background: 'none', border: 'none', outline: 'none', color: 'var(--text-primary)',
-            fontSize: 'var(--text-sm)', width: '100%', fontFamily: 'var(--font)',
-          }}
-          aria-label="Search beats"
-        />
-      </div>
+      {/* Search with autocomplete */}
+      <SearchAutocomplete
+        value={searchParams.get('q') || ''}
+        onChange={(v) => updateParam('q', v)}
+        beats={beats}
+      />
 
       {/* Genre pills */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
@@ -589,11 +689,13 @@ export default function CatalogPage({ playBeat, currentBeat, isPlaying, likedBea
             </div>
           )
         ) : filteredBeats.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: 80, color: 'var(--text-muted)', background: 'var(--bg-card)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
-            <div style={{ fontSize: 'var(--text-lg)', marginBottom: 8 }}>No beats found</div>
-            <div style={{ fontSize: 'var(--text-sm)', marginBottom: 24 }}>Try different filters</div>
-            {hasFilters && <button onClick={clearFilters} className="btn-ghost">Clear filters</button>}
+          <div style={{ textAlign: 'center', padding: '80px 32px', color: 'var(--text-muted)', background: 'var(--bg-card)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 56, marginBottom: 16, lineHeight: 1 }}>🔍</div>
+            <div style={{ fontSize: 'var(--text-xl)', fontWeight: 700, marginBottom: 8, color: 'var(--text-primary)' }}>No beats found</div>
+            <div style={{ fontSize: 'var(--text-sm)', marginBottom: 24, maxWidth: 320, margin: '0 auto 24px', lineHeight: 1.6 }}>
+              {searchQuery ? `No results for "${searchQuery}". Try a different search term.` : 'Try adjusting your filters to find what you\'re looking for.'}
+            </div>
+            {hasFilters && <button onClick={clearFilters} className="btn-ghost" style={{ marginBottom: 8 }}>Clear all filters</button>}
           </div>
         ) : viewMode === 'grid' ? (
           <div className="content-loaded" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 20 }}>
