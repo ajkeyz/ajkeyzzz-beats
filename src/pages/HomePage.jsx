@@ -447,7 +447,7 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
           {/* Animated background image */}
           {heroBg && (
             <div className="hero-bg-image" style={{
-              position: 'absolute', inset: '-2%',
+              position: 'absolute', inset: 0,
               backgroundImage: `url(${heroBg})`,
               backgroundSize: 'cover', backgroundPosition: 'center',
               animation: 'heroPan 25s ease-in-out infinite alternate',
@@ -503,9 +503,9 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
         <style>{`
           @keyframes heroPan {
             0% { transform: scale(1) translate(0%, 0%); }
-            33% { transform: scale(1.03) translate(-0.8%, -0.5%); }
-            66% { transform: scale(1.02) translate(0.5%, 0.3%); }
-            100% { transform: scale(1.03) translate(-0.3%, -0.3%); }
+            33% { transform: scale(1.01) translate(-0.3%, -0.2%); }
+            66% { transform: scale(1.01) translate(0.2%, 0.1%); }
+            100% { transform: scale(1.01) translate(-0.1%, -0.1%); }
           }
           @media (max-width: 768px) {
             .hero-section {
