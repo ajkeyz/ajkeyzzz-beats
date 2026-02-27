@@ -9,7 +9,6 @@ export function ThemeProvider({ children }) {
     if (stored) return stored;
     // Clear legacy key from before the light-theme redesign
     localStorage.removeItem('ajk-theme');
-    if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) return 'dark';
     return 'light';
   });
 
