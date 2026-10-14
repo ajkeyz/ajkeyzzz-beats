@@ -18,7 +18,6 @@ export default function BeatEditor() {
   const [form, setForm] = useState({
     title: '', genre: 'Alté', bpm: 120, musical_key: '', typebeat: '',
     tags: '', moods: [], description: '', cover_color: '#FFD800', cover_emoji: '🎵',
-    price_basic: 29.99, price_premium: 99.99, price_unlimited: 149.99, price_exclusive: 299.99,
     featured: false, published: true, playlist: 'alte',
   });
   const [errors, setErrors] = useState({});
@@ -103,10 +102,6 @@ export default function BeatEditor() {
           description: beat.description || '',
           cover_color: beat.cover_color || '#FFD800',
           cover_emoji: beat.cover_emoji || '🎵',
-          price_basic: beat.price_basic ?? 29.99,
-          price_premium: beat.price_premium ?? 99.99,
-          price_unlimited: beat.price_unlimited ?? 149.99,
-          price_exclusive: beat.price_exclusive ?? 299.99,
           featured: beat.featured || false,
           published: beat.published !== false,
           playlist: beat.playlist || '',
@@ -183,10 +178,6 @@ export default function BeatEditor() {
     const parsed = beatSchema.safeParse({
       ...form,
       bpm: Number(form.bpm),
-      price_basic: Number(form.price_basic),
-      price_premium: Number(form.price_premium),
-      price_unlimited: Number(form.price_unlimited),
-      price_exclusive: Number(form.price_exclusive),
       tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
     });
 
@@ -260,10 +251,6 @@ export default function BeatEditor() {
         full_audio_url,
         stems_url,
         duration: audioDuration || 180,
-        price_basic: Number(form.price_basic),
-        price_premium: Number(form.price_premium),
-        price_unlimited: Number(form.price_unlimited),
-        price_exclusive: Number(form.price_exclusive),
         featured: form.featured,
         published: form.published,
         playlist: form.playlist,
@@ -575,7 +562,7 @@ export default function BeatEditor() {
               <div>
                 <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Full Quality File (private)</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                  WAV/MP3 delivered after purchase. {existingFull ? '✓ File uploaded' : 'No file uploaded'}
+                  Full-quality WAV/MP3 for streaming. {existingFull ? '✓ File uploaded' : 'No file uploaded'}
                 </div>
                 {fullFileName && <div style={{ fontSize: 12, color: 'var(--accent-green)', marginTop: 4 }}>New: {fullFileName}</div>}
               </div>
@@ -621,31 +608,6 @@ export default function BeatEditor() {
             </div>
             <input ref={stemsInputRef} type="file" accept=".zip,.rar" onChange={handleStemsChange} style={{ display: 'none' }} />
           </div>
-        </div>
-
-        {/* Pricing */}
-        <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 20, marginTop: 32, textTransform: 'uppercase', letterSpacing: 1 }}>
-          Pricing
-        </h4>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 14 }}>
-          {[
-            { key: 'price_basic', label: 'Basic Lease' },
-            { key: 'price_premium', label: 'Premium Lease' },
-            { key: 'price_unlimited', label: 'Unlimited' },
-            { key: 'price_exclusive', label: 'Exclusive' },
-          ].map(({ key, label }) => (
-            <div key={key}>
-              <label style={labelStyle}>{label} ($)</label>
-              <input
-                type="number"
-                value={form[key]}
-                onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                style={inputStyle}
-                min="0"
-                step="0.01"
-              />
-            </div>
-          ))}
         </div>
 
         {/* Options */}

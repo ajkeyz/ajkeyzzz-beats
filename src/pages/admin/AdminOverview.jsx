@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { fetchBeats, fetchMessages, fetchInquiries, fetchOrders } from '../../lib/data';
+import { fetchBeats, fetchMessages, fetchInquiries } from '../../lib/data';
 import { localStore } from '../../lib/store';
 
 // Simple bar chart component (no external library needed)
@@ -39,7 +39,6 @@ export default function AdminOverview() {
   const [beats, setBeats] = useState([]);
   const [messages, setMessages] = useState([]);
   const [inquiries, setInquiries] = useState([]);
-  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('all');
   const [heroBg, setHeroBg] = useState(() => localStore.getHeroBg());
@@ -54,12 +53,10 @@ export default function AdminOverview() {
       fetchBeats({ published: false }),
       fetchMessages(),
       fetchInquiries(),
-      fetchOrders(),
-    ]).then(([b, m, i, o]) => {
+    ]).then(([b, m, i]) => {
       setBeats(b);
       setMessages(m);
       setInquiries(i);
-      setOrders(o);
       setLoading(false);
     });
   }, []);
@@ -71,19 +68,16 @@ export default function AdminOverview() {
     return items.filter(item => new Date(item.created_at) >= cutoff);
   }, [dateRange]);
 
-  const filteredOrders = useMemo(() => filterByDate(orders), [orders, filterByDate]);
   const filteredInquiries = useMemo(() => filterByDate(inquiries), [inquiries, filterByDate]);
   const filteredMessages = useMemo(() => filterByDate(messages), [messages, filterByDate]);
 
   const totalPlays = beats.reduce((a, b) => a + (b.plays || 0), 0);
   const unreadMsgs = filteredMessages.filter((m) => !m.read).length;
   const newInquiries = filteredInquiries.filter((i) => i.status === 'new').length;
-  const totalRevenue = filteredOrders.reduce((a, o) => a + (o.amount || 0), 0);
 
   const stats = [
     { label: 'Total Beats', value: beats.length, color: 'var(--accent)', emoji: '🎵' },
     { label: 'Total Plays', value: totalPlays.toLocaleString(), color: 'var(--accent-blue)', emoji: '▶' },
-    { label: 'Orders', value: filteredOrders.length, color: 'var(--accent-green)', emoji: '💰', sub: totalRevenue > 0 ? `$${totalRevenue.toFixed(2)}` : null },
     { label: 'Inquiries', value: filteredInquiries.length, color: 'var(--accent-purple)', emoji: '📋', badge: newInquiries },
     { label: 'Messages', value: filteredMessages.length, color: '#FDCB6E', emoji: '✉', badge: unreadMsgs },
   ];
