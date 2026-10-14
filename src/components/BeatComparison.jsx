@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import Icons from './Icons';
-import { formatTime, formatPrice } from '../lib/utils';
+import { formatTime } from '../lib/utils';
 import useFocusTrap from '../hooks/useFocusTrap';
 
 export default function BeatComparison({ beats, onClose, onPlay, currentBeat, isPlaying }) {
@@ -13,8 +13,6 @@ export default function BeatComparison({ beats, onClose, onPlay, currentBeat, is
     { label: 'BPM', key: 'bpm' },
     { label: 'Key', key: 'musical_key', fallback: '—' },
     { label: 'Duration', key: 'duration', format: formatTime },
-    { label: 'Basic', key: 'price_basic', format: formatPrice },
-    { label: 'Premium', key: 'price_premium', format: formatPrice },
     { label: 'Plays', key: 'plays', format: (v) => (v || 0).toLocaleString() },
   ];
 

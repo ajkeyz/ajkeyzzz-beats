@@ -3,16 +3,12 @@ import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './components/Navbar';
 import PlayerBar from './components/PlayerBar';
-import LicensingModal from './components/LicensingModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import CookieBanner from './components/CookieBanner';
 import MobileNav from './components/MobileNav';
-import CartDrawer from './components/CartDrawer';
-import ActivityFeed from './components/ActivityFeed';
 import useAudioPlayer from './hooks/useAudioPlayer';
 import useAuth from './hooks/useAuth';
 import { localStore } from './lib/store';
-import { cart } from './lib/cart';
 
 // Pages — eager load critical routes
 import HomePage from './pages/HomePage';
@@ -20,10 +16,8 @@ import CatalogPage from './pages/CatalogPage';
 import BeatDetailPage from './pages/BeatDetailPage';
 
 // Lazy load non-critical routes
-const LicensingPage = lazy(() => import('./pages/LicensingPage'));
 const CustomPage = lazy(() => import('./pages/CustomPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
-const DownloadPage = lazy(() => import('./pages/DownloadPage'));
 
 // Lazy load admin pages (only needed for admin users)
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
@@ -32,7 +26,6 @@ const AdminBeats = lazy(() => import('./pages/admin/AdminBeats'));
 const BeatEditor = lazy(() => import('./pages/admin/BeatEditor'));
 const AdminCollections = lazy(() => import('./pages/admin/AdminCollections'));
 const AdminInquiries = lazy(() => import('./pages/admin/AdminInquiries'));
-const AdminOrders = lazy(() => import('./pages/admin/AdminOrders'));
 const AdminMessages = lazy(() => import('./pages/admin/AdminMessages'));
 
 function PageLoader() {
@@ -145,16 +138,6 @@ export default function App() {
   const { isAdmin, login, logout } = useAuth();
   const player = useAudioPlayer();
 
-  // Cart drawer
-  const [cartOpen, setCartOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(() => cart.getItems().length);
-  useEffect(() => {
-    const onStorage = () => setCartCount(cart.getItems().length);
-    window.addEventListener('storage', onStorage);
-    const interval = setInterval(onStorage, 1000);
-    return () => { window.removeEventListener('storage', onStorage); clearInterval(interval); };
-  }, []);
-
   // Route progress bar
   const [showProgress, setShowProgress] = useState(false);
   const prevPath = useRef(location.pathname);
@@ -192,15 +175,7 @@ export default function App() {
     });
   }, []);
 
-  // Licensing modal
-  const [showLicensing, setShowLicensing] = useState(false);
-  const [licensingBeat, setLicensingBeat] = useState(null);
-  const openLicensing = useCallback((beat) => {
-    setLicensingBeat(beat);
-    setShowLicensing(true);
-  }, []);
-
-  // Shared props for pages that need player/likes/licensing
+  // Shared props for pages that need player/likes
   const sharedProps = {
     playBeat: player.playBeat,
     currentBeat: player.currentBeat,
@@ -209,7 +184,6 @@ export default function App() {
     seek: player.seek,
     likedBeats,
     toggleLike,
-    openLicensing,
   };
 
   return (
@@ -224,7 +198,7 @@ export default function App() {
         Skip to main content
       </a>
       <div id="main-content" className={player.currentBeat ? 'has-player' : ''} style={{ minHeight: '100vh', background: 'var(--bg-primary)', paddingBottom: player.currentBeat ? 100 : 0 }}>
-        <Navbar isAdmin={isAdmin} onLogout={logout} cartCount={cartCount} onCartOpen={() => setCartOpen(true)} />
+        <Navbar isAdmin={isAdmin} onLogout={logout} />
 
         {/* Route progress bar */}
         {showProgress && <div className="route-progress-bar" />}
@@ -235,10 +209,8 @@ export default function App() {
               <Route path="/" element={<PageWrapper><HomePage {...sharedProps} /></PageWrapper>} />
               <Route path="/beats" element={<PageWrapper><CatalogPage {...sharedProps} /></PageWrapper>} />
               <Route path="/beats/:slug" element={<PageWrapper><BeatDetailPage {...sharedProps} /></PageWrapper>} />
-              <Route path="/licensing" element={<PageWrapper><LicensingPage /></PageWrapper>} />
               <Route path="/custom" element={<PageWrapper><CustomPage /></PageWrapper>} />
               <Route path="/contact" element={<PageWrapper><ContactPage /></PageWrapper>} />
-              <Route path="/download/:token" element={<PageWrapper><DownloadPage /></PageWrapper>} />
 
               {/* Admin routes */}
               <Route path="/admin" element={
@@ -269,11 +241,6 @@ export default function App() {
               <Route path="/admin/inquiries" element={
                 <AdminLayout isAdmin={isAdmin} login={login}>
                   <AdminInquiries />
-                </AdminLayout>
-              } />
-              <Route path="/admin/orders" element={
-                <AdminLayout isAdmin={isAdmin} login={login}>
-                  <AdminOrders />
                 </AdminLayout>
               } />
               <Route path="/admin/messages" element={
@@ -313,15 +280,7 @@ export default function App() {
           onSeek={player.seek}
           liked={player.currentBeat ? likedBeats.has(player.currentBeat.id) : false}
           onLike={() => player.currentBeat && toggleLike(player.currentBeat.id)}
-          onLicense={() => player.currentBeat && openLicensing(player.currentBeat)}
         />
-
-        {/* Licensing Modal */}
-        <AnimatePresence>
-          {showLicensing && (
-            <LicensingModal beat={licensingBeat} onClose={() => setShowLicensing(false)} />
-          )}
-        </AnimatePresence>
 
         {/* Mobile Bottom Nav */}
         <MobileNav hasPlayer={!!player.currentBeat} />
@@ -352,12 +311,6 @@ export default function App() {
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Cart Drawer */}
-        <CartDrawer isOpen={cartOpen} onClose={() => { setCartOpen(false); setCartCount(cart.getItems().length); }} />
-
-        {/* Activity Feed (social proof) */}
-        <ActivityFeed />
 
         {/* Cookie Consent */}
         <CookieBanner />

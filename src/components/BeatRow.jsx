@@ -2,7 +2,7 @@ import { useState, memo } from 'react';
 import Icons from './Icons';
 import { formatTime } from '../lib/utils';
 
-export default memo(function BeatRow({ beat, index, playBeat, currentBeat, isPlaying, liked, toggleLike, onLicense }) {
+export default memo(function BeatRow({ beat, index, playBeat, currentBeat, isPlaying, liked, toggleLike }) {
   const isActive = currentBeat?.id === beat.id;
   const [hovered, setHovered] = useState(false);
   const color = beat.cover_color || beat.coverColor || '#FFD800';
@@ -82,16 +82,6 @@ export default memo(function BeatRow({ beat, index, playBeat, currentBeat, isPla
           aria-label={liked ? 'Unlike' : 'Like'}
         >
           <Icons.Heart filled={liked} />
-        </button>
-        <button
-          onClick={onLicense}
-          style={{
-            background: 'none', border: `1px solid ${color}33`, padding: '4px 12px',
-            borderRadius: 20, fontSize: 11, color: color, cursor: 'pointer',
-            fontFamily: 'var(--font)', opacity: hovered ? 1 : 0.5, transition: 'all 0.2s',
-          }}
-        >
-          License
         </button>
       </div>
 

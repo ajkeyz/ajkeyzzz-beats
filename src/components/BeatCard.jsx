@@ -9,7 +9,7 @@ import { MOOD_OPTIONS } from '../lib/seeds';
 
 const moodColorMap = Object.fromEntries(MOOD_OPTIONS.map(m => [m.name, m.color]));
 
-export default memo(function BeatCard({ beat, index, playBeat, currentBeat, isPlaying, liked, toggleLike, onLicense, comparing, onCompare }) {
+export default memo(function BeatCard({ beat, index, playBeat, currentBeat, isPlaying, liked, toggleLike, comparing, onCompare }) {
   const navigate = useNavigate();
   const isActive = currentBeat?.id === beat.id;
   const [hovered, setHovered] = useState(false);
@@ -255,28 +255,7 @@ export default memo(function BeatCard({ beat, index, playBeat, currentBeat, isPl
               <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
                 &#9654; {(beat.plays || 0).toLocaleString()}
               </span>
-              <span className="beat-card-price" style={{
-                fontSize: 'var(--text-xs)', fontWeight: 700, color: 'var(--accent)',
-                fontFamily: 'var(--mono)',
-              }}>
-                From ${(beat.price_basic || 29.99).toFixed(0)}
-              </span>
             </div>
-            <button
-              className="beat-card-license"
-              onClick={(e) => { e.stopPropagation(); onLicense?.(); }}
-              style={{
-                background: 'none', border: `1px solid ${color}33`,
-                padding: '5px 14px', borderRadius: 'var(--radius-pill)',
-                fontSize: 'var(--text-xs)', fontWeight: 500, color: color,
-                cursor: 'pointer', fontFamily: 'var(--font)',
-                transition: 'all var(--duration-normal) var(--ease-out)',
-              }}
-              onMouseEnter={(e) => { e.target.style.background = color + '15'; e.target.style.borderColor = color + '55'; }}
-              onMouseLeave={(e) => { e.target.style.background = 'none'; e.target.style.borderColor = color + '33'; }}
-            >
-              License
-            </button>
           </div>
         </div>
       </div>
@@ -325,7 +304,6 @@ export default memo(function BeatCard({ beat, index, playBeat, currentBeat, isPl
               {[
                 { icon: <Icons.Play />, label: isActive && isPlaying ? 'Pause' : 'Play', action: () => playBeat(beat) },
                 { icon: <Icons.Heart />, label: liked ? 'Unlike' : 'Like', action: () => toggleLike() },
-                { icon: <Icons.Music />, label: 'License Beat', action: () => onLicense?.() },
                 { icon: <Icons.ExternalLink />, label: 'View Details', action: () => navigate(`/beats/${beat.slug}`) },
               ].map(item => (
                 <button
@@ -393,20 +371,10 @@ export default memo(function BeatCard({ beat, index, playBeat, currentBeat, isPl
             display: inline-flex !important;
           }
 
-          /* ---- License button: full-width on mobile ---- */
+          /* ---- Card footer on mobile ---- */
           .beat-card-footer {
             flex-direction: column !important;
             gap: 10px !important;
-          }
-
-          .beat-card-license {
-            width: 100% !important;
-            text-align: center !important;
-            padding: 10px 14px !important;
-            min-height: 44px !important;
-            font-size: 13px !important;
-            font-weight: 600 !important;
-            border-width: 1.5px !important;
           }
 
           /* ---- Tap target sizes: minimum 44px ---- */

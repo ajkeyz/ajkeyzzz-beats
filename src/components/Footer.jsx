@@ -95,7 +95,6 @@ export default function Footer() {
               { label: 'Browse Catalog', to: '/beats' },
               { label: 'Trending', to: '/beats?sort=popular' },
               { label: 'New Releases', to: '/beats?sort=newest' },
-              { label: 'Licensing', to: '/licensing' },
               { label: 'Custom Production', to: '/custom' },
             ].map(({ label, to }) => (
               <Link key={label} to={to} style={{
@@ -119,9 +118,6 @@ export default function Footer() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <Link to="/contact" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: 13 }}>
               Contact Us
-            </Link>
-            <Link to="/licensing" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: 13 }}>
-              License Agreement
             </Link>
             <Link to="#" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: 13 }}>
               Terms of Service
