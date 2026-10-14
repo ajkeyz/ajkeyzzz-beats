@@ -355,7 +355,6 @@ function FilterPanel({
                   <option value="bpm_asc">BPM Low → High</option>
                   <option value="bpm_desc">BPM High → Low</option>
                   <option value="title">Title A → Z</option>
-                  <option value="price_asc">Price Low → High</option>
                 </select>
               </div>
 
@@ -406,7 +405,7 @@ function FilterPanel({
 }
 
 // ─── MAIN ───
-export default function CatalogPage({ playBeat, currentBeat, isPlaying, likedBeats, toggleLike, openLicensing }) {
+export default function CatalogPage({ playBeat, currentBeat, isPlaying, likedBeats, toggleLike }) {
   const [beats, setBeats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -467,7 +466,6 @@ export default function CatalogPage({ playBeat, currentBeat, isPlaying, likedBea
       case 'bpm_asc': result.sort((a, b) => a.bpm - b.bpm); break;
       case 'bpm_desc': result.sort((a, b) => b.bpm - a.bpm); break;
       case 'title': result.sort((a, b) => a.title.localeCompare(b.title)); break;
-      case 'price_asc': result.sort((a, b) => (a.price_basic || 0) - (b.price_basic || 0)); break;
       case 'newest': default: result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); break;
     }
     return result;
@@ -590,7 +588,7 @@ export default function CatalogPage({ playBeat, currentBeat, isPlaying, likedBea
         {/* Results bar */}
         <div style={{ display: 'flex', gap: 12, marginBottom: 24, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
           <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>
-            {filteredBeats.length} beat{filteredBeats.length !== 1 ? 's' : ''}{sortBy !== 'newest' ? ` \u00b7 ${{ newest: 'Newest', popular: 'Most Popular', bpm_asc: 'BPM \u2191', bpm_desc: 'BPM \u2193', title: 'A\u2013Z', price_asc: 'Price \u2191' }[sortBy] || sortBy}` : ''}
+            {filteredBeats.length} beat{filteredBeats.length !== 1 ? 's' : ''}{sortBy !== 'newest' ? ` \u00b7 ${{ newest: 'Newest', popular: 'Most Popular', bpm_asc: 'BPM \u2191', bpm_desc: 'BPM \u2193', title: 'A\u2013Z' }[sortBy] || sortBy}` : ''}
           </span>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <AnimatePresence>
@@ -670,7 +668,7 @@ export default function CatalogPage({ playBeat, currentBeat, isPlaying, likedBea
                 padding: '4px 12px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
                 borderRadius: 50, fontSize: 12, fontWeight: 500,
               }}>
-                Sort: {{ popular: 'Most Popular', bpm_asc: 'BPM \u2191', bpm_desc: 'BPM \u2193', title: 'A\u2013Z', price_asc: 'Price \u2191' }[sortBy] || sortBy}
+                Sort: {{ popular: 'Most Popular', bpm_asc: 'BPM \u2191', bpm_desc: 'BPM \u2193', title: 'A\u2013Z' }[sortBy] || sortBy}
                 <button onClick={() => updateParam('sort', '')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 14, padding: 0, lineHeight: 1 }}>&times;</button>
               </span>
             )}
@@ -703,7 +701,6 @@ export default function CatalogPage({ playBeat, currentBeat, isPlaying, likedBea
               <BeatCard key={beat.id} beat={beat} index={i}
                 playBeat={(b) => playBeat(b, filteredBeats)} currentBeat={currentBeat} isPlaying={isPlaying}
                 liked={likedBeats.has(beat.id)} toggleLike={() => toggleLike(beat.id)}
-                onLicense={() => openLicensing(beat)}
                 comparing={compareBeats.some(c => c.id === beat.id)} onCompare={() => toggleCompare(beat)}
               />
             ))}
@@ -733,7 +730,6 @@ export default function CatalogPage({ playBeat, currentBeat, isPlaying, likedBea
               <BeatRow key={beat.id} beat={beat} index={i}
                 playBeat={(b) => playBeat(b, filteredBeats)} currentBeat={currentBeat} isPlaying={isPlaying}
                 liked={likedBeats.has(beat.id)} toggleLike={() => toggleLike(beat.id)}
-                onLicense={() => openLicensing(beat)}
               />
             ))}
           </div>

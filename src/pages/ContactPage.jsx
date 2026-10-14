@@ -52,7 +52,7 @@ export default function ContactPage() {
     <>
       <Helmet>
         <title>Contact — AJKEYZZZ</title>
-        <meta name="description" content="Get in touch with AJKEYZZZ for beat licensing, custom production, or collaborations." />
+        <meta name="description" content="Get in touch with AJKEYZZZ for custom production or collaborations." />
       </Helmet>
 
       <div style={{ paddingTop: 100, maxWidth: 700, margin: '0 auto', padding: '100px 24px 80px' }}>

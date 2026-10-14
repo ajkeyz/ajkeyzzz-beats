@@ -331,7 +331,7 @@ function MarqueeTicker({ items }) {
 }
 
 // ─── QUICK ACCESS BEAT ROW ───
-const QuickAccessRow = memo(function QuickAccessRow({ title, subtitle, beats, playBeat, currentBeat, isPlaying, likedBeats, toggleLike, openLicensing, allBeats }) {
+const QuickAccessRow = memo(function QuickAccessRow({ title, subtitle, beats, playBeat, currentBeat, isPlaying, likedBeats, toggleLike, allBeats }) {
   const scrollRef = useRef(null);
 
   if (beats.length === 0) return null;
@@ -379,7 +379,6 @@ const QuickAccessRow = memo(function QuickAccessRow({ title, subtitle, beats, pl
                 isPlaying={isPlaying}
                 liked={likedBeats.has(beat.id)}
                 toggleLike={() => toggleLike(beat.id)}
-                onLicense={() => openLicensing(beat)}
               />
             </div>
           ))}
@@ -397,7 +396,7 @@ const TESTIMONIALS = [
 ];
 
 // ─── MAIN COMPONENT ───
-export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats, toggleLike, openLicensing }) {
+export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats, toggleLike }) {
   const [beats, setBeats] = useState([]);
   const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -430,7 +429,7 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
     <>
       <Helmet>
         <title>AJKEYZZZ — Beats That Move The World</title>
-        <meta name="description" content="Premium Alté, Afro Swing, and Afrobeats production from Lagos to Cali. Browse, preview, and license beats by AJKEYZZZ." />
+        <meta name="description" content="Premium Alté, Afro Swing, and Afrobeats production from Lagos to Cali. Browse and preview beats by AJKEYZZZ." />
         <meta property="og:title" content="AJKEYZZZ — Beats That Move The World" />
         <meta property="og:description" content="Premium Alté, Afro Swing, and Afrobeats production. Listen first, vibe always." />
         <meta property="og:type" content="website" />
@@ -521,9 +520,9 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
 
         {/* ═══ MARQUEE ═══ */}
         <MarqueeTicker items={[
-          'Premium Beats', 'Alté', 'Afro Swing', 'Exclusive Licensing',
+          'Premium Beats', 'Alté', 'Afro Swing', 'Curated Sound',
           'Stems Available', 'Afrobeats', 'Custom Production', 'Lagos to Cali',
-          'Premium Beats', 'Alté', 'Afro Swing', 'Exclusive Licensing',
+          'Premium Beats', 'Alté', 'Afro Swing', 'Curated Sound',
         ]} />
 
         {/* ═══ STATS ═══ */}
@@ -631,8 +630,7 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
                     isPlaying={isPlaying}
                     liked={likedBeats.has(beat.id)}
                     toggleLike={() => toggleLike(beat.id)}
-                    onLicense={() => openLicensing(beat)}
-                  />
+                                      />
                 ))
               }
             </div>
@@ -662,8 +660,7 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
                     isPlaying={isPlaying}
                     liked={likedBeats.has(beat.id)}
                     toggleLike={() => toggleLike(beat.id)}
-                    onLicense={() => openLicensing(beat)}
-                  />
+                                      />
                 ))
               }
             </div>
@@ -700,7 +697,6 @@ export default function HomePage({ playBeat, currentBeat, isPlaying, likedBeats,
                 isPlaying={isPlaying}
                 likedBeats={likedBeats}
                 toggleLike={toggleLike}
-                openLicensing={openLicensing}
               />
             ))}
           </section>

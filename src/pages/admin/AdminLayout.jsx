@@ -90,7 +90,6 @@ export default function AdminLayout({ isAdmin, login, children }) {
     { path: '/admin/beats', label: 'Beats' },
     { path: '/admin/collections', label: 'Collections' },
     { path: '/admin/inquiries', label: 'Inquiries' },
-    { path: '/admin/orders', label: 'Orders' },
     { path: '/admin/messages', label: 'Messages' },
   ];
 
@@ -104,7 +103,7 @@ export default function AdminLayout({ isAdmin, login, children }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
         <div>
           <h1 style={{ fontSize: 32, fontWeight: 800 }}>Dashboard</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Manage your beats, orders, and inquiries</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Manage your beats and inquiries</p>
         </div>
       </div>
 
