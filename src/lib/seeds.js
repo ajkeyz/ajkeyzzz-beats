@@ -6,9 +6,7 @@ export const SEED_BEATS = [
     description: 'A dreamy Alté beat with lush pads and gentle percussion. Perfect for smooth vocals and introspective lyrics.',
     cover_color: '#FFD800', cover_emoji: '💗', cover_art_url: '',
     preview_url: '', full_audio_url: '', stems_url: '',
-    duration: 198, price_basic: 29.99, price_premium: 99.99,
-    price_unlimited: 149.99, price_exclusive: 299.99,
-    featured: true, published: true, plays: 342,
+    duration: 198,     featured: true, published: true, plays: 342,
     created_at: '2025-01-15T00:00:00Z', playlist: 'alte',
   },
   {
@@ -17,9 +15,7 @@ export const SEED_BEATS = [
     description: 'Smooth and balanced Alté vibes with warm bass and crisp hi-hats.',
     cover_color: '#2D3436', cover_emoji: '⚖️', cover_art_url: '',
     preview_url: '', full_audio_url: '', stems_url: '',
-    duration: 174, price_basic: 29.99, price_premium: 99.99,
-    price_unlimited: 149.99, price_exclusive: 299.99,
-    featured: true, published: true, plays: 218,
+    duration: 174,     featured: true, published: true, plays: 218,
     created_at: '2025-01-10T00:00:00Z', playlist: 'alte',
   },
   {
@@ -28,9 +24,7 @@ export const SEED_BEATS = [
     description: 'Tropical Alté beat with guitar loops and relaxed groove.',
     cover_color: '#00B894', cover_emoji: '🌴', cover_art_url: '',
     preview_url: '', full_audio_url: '', stems_url: '',
-    duration: 210, price_basic: 29.99, price_premium: 99.99,
-    price_unlimited: 149.99, price_exclusive: 299.99,
-    featured: true, published: true, plays: 189,
+    duration: 210,     featured: true, published: true, plays: 189,
     created_at: '2025-01-08T00:00:00Z', playlist: 'alte',
   },
   {
@@ -39,9 +33,7 @@ export const SEED_BEATS = [
     description: 'Ethereal Alté beat with spacious synths and bouncy drums.',
     cover_color: '#636E72', cover_emoji: '🌊', cover_art_url: '',
     preview_url: '', full_audio_url: '', stems_url: '',
-    duration: 186, price_basic: 29.99, price_premium: 99.99,
-    price_unlimited: 149.99, price_exclusive: 299.99,
-    featured: true, published: true, plays: 156,
+    duration: 186,     featured: true, published: true, plays: 156,
     created_at: '2025-01-05T00:00:00Z', playlist: 'alte',
   },
   {
@@ -50,9 +42,7 @@ export const SEED_BEATS = [
     description: 'Late night Afro Swing vibes with rolling basslines and atmospheric pads.',
     cover_color: '#0984E3', cover_emoji: '🌙', cover_art_url: '',
     preview_url: '', full_audio_url: '', stems_url: '',
-    duration: 204, price_basic: 29.99, price_premium: 99.99,
-    price_unlimited: 149.99, price_exclusive: 299.99,
-    featured: false, published: true, plays: 421,
+    duration: 204,     featured: false, published: true, plays: 421,
     created_at: '2025-02-01T00:00:00Z', playlist: 'afro-swing',
   },
   {
@@ -61,9 +51,7 @@ export const SEED_BEATS = [
     description: 'High-energy Afro Swing with percussive grooves and catchy melodies.',
     cover_color: '#D63031', cover_emoji: '🍛', cover_art_url: '',
     preview_url: '', full_audio_url: '', stems_url: '',
-    duration: 192, price_basic: 29.99, price_premium: 99.99,
-    price_unlimited: 149.99, price_exclusive: 299.99,
-    featured: false, published: true, plays: 305,
+    duration: 192,     featured: false, published: true, plays: 305,
     created_at: '2025-02-05T00:00:00Z', playlist: 'afro-swing',
   },
   {
@@ -72,9 +60,7 @@ export const SEED_BEATS = [
     description: 'Warm, sun-soaked Alté beat with soulful chords and gentle drums.',
     cover_color: '#FDCB6E', cover_emoji: '☀️', cover_art_url: '',
     preview_url: '', full_audio_url: '', stems_url: '',
-    duration: 216, price_basic: 29.99, price_premium: 99.99,
-    price_unlimited: 149.99, price_exclusive: 299.99,
-    featured: false, published: true, plays: 267,
+    duration: 216,     featured: false, published: true, plays: 267,
     created_at: '2025-02-10T00:00:00Z', playlist: 'alte',
   },
   {
@@ -83,9 +69,7 @@ export const SEED_BEATS = [
     description: 'Vibrant Afro Swing anthem with driving rhythms and hypnotic melodies.',
     cover_color: '#6C5CE7', cover_emoji: '🌃', cover_art_url: '',
     preview_url: '', full_audio_url: '', stems_url: '',
-    duration: 180, price_basic: 29.99, price_premium: 99.99,
-    price_unlimited: 149.99, price_exclusive: 299.99,
-    featured: false, published: true, plays: 534,
+    duration: 180,     featured: false, published: true, plays: 534,
     created_at: '2025-02-12T00:00:00Z', playlist: 'afro-swing',
   },
 ];
@@ -94,57 +78,6 @@ export const SEED_PLAYLISTS = [
   { id: 'alte', name: 'Alté', cover_color: '#FFD800', cover_emoji: '💗' },
   { id: 'afro-swing', name: 'Afro Swing', cover_color: '#0984E3', cover_emoji: '🎶' },
 ];
-
-export const LICENSE_TIERS = [
-  {
-    id: 'free',
-    name: 'Free Download',
-    priceKey: null,
-    defaultPrice: 0,
-    features: ['Tagged MP3 (with producer tag)', 'Non-commercial use only', 'Must credit AJKEYZZZ'],
-    accent: '#636E72',
-    free: true,
-  },
-  {
-    id: 'basic',
-    name: 'Basic Lease',
-    priceKey: 'price_basic',
-    defaultPrice: 29.99,
-    features: ['High Quality MP3', 'For Hobby Musicians, YouTubers & Podcasters', 'YouTube, SoundCloud, Audiomack'],
-    accent: '#636E72',
-  },
-  {
-    id: 'premium',
-    name: 'Premium Lease',
-    priceKey: 'price_premium',
-    defaultPrice: 99.99,
-    features: ['MP3 & WAV', 'DSP Distribution', 'Radio Broadcasting Rights', 'Monetize YouTube Videos', 'Spotify, iTunes & more'],
-    accent: '#0984E3',
-    popular: true,
-  },
-  {
-    id: 'unlimited',
-    name: 'Unlimited Lease',
-    priceKey: 'price_unlimited',
-    defaultPrice: 149.99,
-    features: ['MP3, WAV & Stems', 'Unlimited Distribution', 'Radio Broadcasting', 'Paid Performances', 'All Platforms'],
-    accent: '#6C5CE7',
-  },
-  {
-    id: 'exclusive',
-    name: 'Exclusive',
-    priceKey: 'price_exclusive',
-    defaultPrice: 299.99,
-    features: ['MP3, WAV & Stems', 'Full Ownership & Control', 'Beat Removed From Store', 'All Premium Features', 'Film, TV, Netflix & More'],
-    accent: '#FFD800',
-  },
-];
-
-export const DISCOUNT_CODES = {
-  'LAUNCH20': { type: 'percent', value: 20, description: '20% off', minAmount: 0 },
-  'FIRST10': { type: 'percent', value: 10, description: '10% off first purchase', minAmount: 0 },
-  'BEATS50': { type: 'fixed', value: 50, description: '$50 off', minAmount: 100 },
-};
 
 export const GENRE_OPTIONS = ['Alté', 'Afro Swing', 'Afrobeats', 'Amapiano', 'R&B', 'Hip Hop'];
 

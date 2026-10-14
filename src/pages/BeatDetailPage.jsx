@@ -9,8 +9,8 @@ import CoverArt from '../components/CoverArt';
 import Waveform from '../components/Waveform';
 import { useToast } from '../components/Toast';
 import { fetchBeatBySlug, fetchBeats } from '../lib/data';
-import { LICENSE_TIERS, MOOD_OPTIONS } from '../lib/seeds';
-import { formatTime, formatPrice } from '../lib/utils';
+import { MOOD_OPTIONS } from '../lib/seeds';
+import { formatTime } from '../lib/utils';
 import { trackBeatView } from '../lib/analytics';
 
 const moodColorMap = Object.fromEntries(MOOD_OPTIONS.map(m => [m.name, m.color]));
@@ -60,7 +60,7 @@ function ShareButtons({ beat }) {
   );
 }
 
-export default function BeatDetailPage({ playBeat, currentBeat, isPlaying, progress, seek, likedBeats, toggleLike, openLicensing }) {
+export default function BeatDetailPage({ playBeat, currentBeat, isPlaying, progress, seek, likedBeats, toggleLike }) {
   const { slug } = useParams();
   const [beat, setBeat] = useState(null);
   const [similarBeats, setSimilarBeats] = useState([]);
@@ -155,7 +155,7 @@ export default function BeatDetailPage({ playBeat, currentBeat, isPlaying, progr
     <>
       <Helmet>
         <title>{beat.title} — AJKEYZZZ Beats</title>
-        <meta name="description" content={beat.description || `${beat.title} — ${beat.typebeat}. ${beat.bpm} BPM, ${beat.musical_key || ''} ${beat.genre}. License this beat from AJKEYZZZ.`} />
+        <meta name="description" content={beat.description || `${beat.title} — ${beat.typebeat}. ${beat.bpm} BPM, ${beat.musical_key || ''} ${beat.genre}. Listen now.`} />
         <meta property="og:title" content={`${beat.title} — AJKEYZZZ Beats`} />
         <meta property="og:description" content={`${beat.typebeat || beat.genre} · ${beat.bpm} BPM`} />
         <meta property="og:type" content="music.song" />
@@ -169,12 +169,6 @@ export default function BeatDetailPage({ playBeat, currentBeat, isPlaying, progr
           duration: `PT${Math.floor((beat.duration || 0) / 60)}M${Math.floor((beat.duration || 0) % 60)}S`,
           genre: beat.genre,
           creator: { '@type': 'Person', name: 'AJKEYZZZ' },
-          offers: {
-            '@type': 'Offer',
-            price: beat.price_basic || 29.99,
-            priceCurrency: 'USD',
-            availability: 'https://schema.org/InStock',
-          },
         })}</script>
       </Helmet>
 
@@ -358,17 +352,6 @@ export default function BeatDetailPage({ playBeat, currentBeat, isPlaying, progr
                   {isActive && isPlaying ? <Icons.Pause /> : <Icons.Play />}
                   {isActive && isPlaying ? 'Pause' : 'Play Preview'}
                 </motion.button>
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => openLicensing(beat)}
-                  style={{
-                    padding: '14px 32px', borderRadius: 50, background: 'transparent',
-                    border: `1px solid ${color}44`, color: color, fontSize: 14, fontWeight: 600,
-                    cursor: 'pointer', fontFamily: 'var(--font)',
-                  }}
-                >
-                  License This Beat
-                </motion.button>
                 <button
                   onClick={() => toggleLike(beat.id)}
                   style={{
@@ -405,59 +388,8 @@ export default function BeatDetailPage({ playBeat, currentBeat, isPlaying, progr
         </div>
       </div>
 
-      {/* License tiers + similar beats */}
+      {/* Similar beats */}
       <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 80px' }}>
-        <section style={{ marginBottom: 64 }}>
-          <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 24 }}>License Options</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
-            {LICENSE_TIERS.map((tier) => {
-              const price = beat[tier.priceKey] || tier.defaultPrice;
-              return (
-                <motion.div
-                  key={tier.id}
-                  whileHover={{ y: -4 }}
-                  style={{
-                    background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', padding: 24,
-                    border: tier.popular ? `1px solid ${tier.accent}44` : '1px solid var(--border)',
-                    position: 'relative', transition: 'box-shadow 0.3s',
-                  }}
-                >
-                  {tier.popular && (
-                    <div style={{
-                      position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)',
-                      background: tier.accent, padding: '3px 12px', borderRadius: 20,
-                      fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#fff',
-                    }}>
-                      Popular
-                    </div>
-                  )}
-                  <div style={{ fontSize: 13, fontWeight: 600, color: tier.accent, marginBottom: 4 }}>{tier.name}</div>
-                  <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 12 }}>{formatPrice(price)}</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
-                    {tier.features.slice(0, 3).map((f, i) => (
-                      <div key={i} style={{ fontSize: 11, color: 'var(--text-secondary)', display: 'flex', gap: 6 }}>
-                        <span style={{ color: tier.accent }}>✓</span> {f}
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => openLicensing(beat)}
-                    style={{
-                      width: '100%', padding: '10px 0', borderRadius: 50,
-                      background: tier.popular ? tier.accent : 'transparent',
-                      border: tier.popular ? 'none' : `1px solid ${tier.accent}33`,
-                      color: tier.popular ? '#fff' : tier.accent,
-                      fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font)',
-                    }}
-                  >
-                    Select
-                  </button>
-                </motion.div>
-              );
-            })}
-          </div>
-        </section>
-
         {similarBeats.length > 0 && (
           <section style={{ marginBottom: 64 }}>
             <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 24 }}>Similar Beats</h2>
@@ -472,7 +404,6 @@ export default function BeatDetailPage({ playBeat, currentBeat, isPlaying, progr
                   isPlaying={isPlaying}
                   liked={likedBeats.has(b.id)}
                   toggleLike={() => toggleLike(b.id)}
-                  onLicense={() => openLicensing(b)}
                 />
               ))}
             </div>

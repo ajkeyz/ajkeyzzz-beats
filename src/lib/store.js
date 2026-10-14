@@ -3,7 +3,6 @@
 
 const BEATS_KEY = 'ajkeyzzz-beats-v3';
 const INQUIRIES_KEY = 'ajkeyzzz-inquiries';
-const ORDERS_KEY = 'ajkeyzzz-orders';
 const MESSAGES_KEY = 'ajkeyzzz-messages';
 const COLLECTIONS_KEY = 'ajkeyzzz-collections';
 const ADMIN_KEY = 'ajkeyzzz-admin-session';
@@ -39,10 +38,6 @@ export const localStore = {
   // Inquiries
   getInquiries: () => get(INQUIRIES_KEY, []),
   setInquiries: (inqs) => set(INQUIRIES_KEY, inqs),
-
-  // Orders
-  getOrders: () => get(ORDERS_KEY, []),
-  setOrders: (orders) => set(ORDERS_KEY, orders),
 
   // Messages (contact form)
   getMessages: () => get(MESSAGES_KEY, []),

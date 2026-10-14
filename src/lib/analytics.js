@@ -10,8 +10,6 @@ const EVENT_TYPES = {
   PLAY: 'play',
   PAUSE: 'pause',
   SEEK: 'seek',
-  LICENSE_CLICK: 'license_click',
-  CHECKOUT_START: 'checkout_start',
   INQUIRY_SUBMIT: 'inquiry_submit',
   CONTACT_SUBMIT: 'contact_submit',
   PAGE_VIEW: 'page_view',
@@ -71,14 +69,6 @@ export function trackPlay(beatId, beatTitle) {
 
 export function trackPause(beatId) {
   trackEvent(EVENT_TYPES.PAUSE, { beat_id: beatId });
-}
-
-export function trackLicenseClick(beatId, beatTitle) {
-  trackEvent(EVENT_TYPES.LICENSE_CLICK, { beat_id: beatId, beat_title: beatTitle });
-}
-
-export function trackCheckoutStart(beatId, licenseTier, amount) {
-  trackEvent(EVENT_TYPES.CHECKOUT_START, { beat_id: beatId, license_tier: licenseTier, amount });
 }
 
 export function trackInquirySubmit(inquiryType) {

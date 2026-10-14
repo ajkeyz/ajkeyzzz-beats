@@ -222,7 +222,7 @@ function QueueDrawer({ queue, recentlyPlayed, onClose, currentBeat, onPlayFromHi
 }
 
 // ─── EXPANDED PLAYER ───
-function ExpandedPlayer({ beat, isPlaying, progress, currentTime, duration, volume, setVolume, loading, onPlayPause, onNext, onPrev, onSeek, onShuffle, shuffle, repeat, onRepeat, liked, onLike, onLicense, onCollapse }) {
+function ExpandedPlayer({ beat, isPlaying, progress, currentTime, duration, volume, setVolume, loading, onPlayPause, onNext, onPrev, onSeek, onShuffle, shuffle, repeat, onRepeat, liked, onLike, onCollapse }) {
   const color = beat.cover_color || '#FFD800';
 
   return (
@@ -349,13 +349,6 @@ function ExpandedPlayer({ beat, isPlaying, progress, currentTime, duration, volu
         <button className="like-bounce" onClick={onLike} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
           <Icons.Heart filled={liked} />
         </button>
-        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-          onClick={onLicense}
-          className="btn-primary"
-          style={{ padding: '10px 24px', background: color }}
-        >
-          License Beat
-        </motion.button>
       </div>
     </motion.div>
   );
@@ -366,7 +359,7 @@ export default function PlayerBar({
   beat, isPlaying, progress, currentTime, duration,
   volume, setVolume, loading, queue = [],
   onPlayPause, onNext, onPrev, onSeek,
-  liked, onLike, onLicense,
+  liked, onLike,
   shuffle, onShuffle, repeat, onRepeat, recentlyPlayed = [], onPlayFromHistory,
   playbackSpeed = 1, onCycleSpeed,
 }) {
@@ -657,14 +650,6 @@ export default function PlayerBar({
                 >
                   <Icons.Expand />
                 </button>
-
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                  className="player-license-btn btn-primary"
-                  onClick={onLicense}
-                  style={{ padding: '8px 20px', background: color, fontSize: 'var(--text-xs)' }}
-                >
-                  License
-                </motion.button>
               </div>
             </div>
             </div>
@@ -701,7 +686,7 @@ export default function PlayerBar({
             onPlayPause={onPlayPause} onNext={onNext} onPrev={onPrev} onSeek={onSeek}
             shuffle={shuffle} onShuffle={onShuffle}
             repeat={repeat} onRepeat={onRepeat}
-            liked={liked} onLike={onLike} onLicense={onLicense}
+            liked={liked} onLike={onLike}
             onCollapse={() => setExpanded(false)}
           />
         )}

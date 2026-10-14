@@ -11,10 +11,6 @@ export const beatSchema = z.object({
   description: z.string().max(2000).optional().default(''),
   cover_color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#FFD800'),
   cover_emoji: z.string().max(4).default('🎵'),
-  price_basic: z.number().min(0).default(29.99),
-  price_premium: z.number().min(0).default(99.99),
-  price_unlimited: z.number().min(0).default(149.99),
-  price_exclusive: z.number().min(0).default(299.99),
   featured: z.boolean().default(false),
   published: z.boolean().default(true),
 });
