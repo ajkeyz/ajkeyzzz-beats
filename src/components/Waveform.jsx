@@ -95,6 +95,11 @@ export default function Waveform({
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
+    // The canvas can be mounted but hidden (e.g. the desktop mini-player's
+    // waveform is display:none on mobile). A 0-size rect makes barWidth and
+    // the corner radius negative, and ctx.roundRect throws on negative radii —
+    // which React routes to the ErrorBoundary. Skip drawing until visible.
+    if (rect.width <= 0 || rect.height <= 0) return;
 
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
@@ -121,9 +126,14 @@ export default function Waveform({
         ctx.fillStyle = 'rgba(255,255,255,0.15)';
       }
 
-      const radius = Math.min(barWidth / 2, 2);
+      const radius = Math.max(0, Math.min(barWidth / 2, 2));
       ctx.beginPath();
-      ctx.roundRect(x, y, barWidth, barHeight, radius);
+      if (typeof ctx.roundRect === 'function') {
+        ctx.roundRect(x, y, barWidth, barHeight, radius);
+      } else {
+        // Older Safari (< 16) has no roundRect — fall back to square bars
+        ctx.rect(x, y, barWidth, barHeight);
+      }
       ctx.fill();
     });
   }, [bars, progress, color, hoverX]);

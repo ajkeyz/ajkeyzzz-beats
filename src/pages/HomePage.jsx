@@ -144,7 +144,12 @@ function HeroWaveform({ isPlaying, color = '#FFD800' }) {
         gradient.addColorStop(1, '#6C5CE7' + (isPlaying ? '88' : '22'));
         ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.roundRect(x, y, barW, h, 2);
+        if (typeof ctx.roundRect === 'function') {
+          ctx.roundRect(x, y, barW, h, 2);
+        } else {
+          // Older Safari (< 16) has no roundRect — fall back to square bars
+          ctx.rect(x, y, barW, h);
+        }
         ctx.fill();
       }
 
